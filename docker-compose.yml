@@ -30,7 +30,7 @@ services:
     environment:
       COLLECTOR_OTLP_ENABLED: 'true'
     volumes:
-      - ./jaeger-ui.json:/etc/jaeger/jaeger-ui.json:ro
+      - ./infra/jeaguer-ui/jaeger-ui.json:/etc/jaeger/jaeger-ui.json:ro
 
   loki:
     image: grafana/loki:3.5.0
