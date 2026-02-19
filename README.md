@@ -4,21 +4,21 @@ A production-ready Go REST API boilerplate built with modern tooling and best pr
 
 ## Tech Stack
 
-| Category            | Technology                                                        |
-| ------------------- | ----------------------------------------------------------------- |
-| **Language**         | [Go 1.25+](https://go.dev/)                                      |
-| **HTTP Framework**   | [Fuego](https://github.com/go-fuego/fuego)                       |
-| **Database**         | [PostgreSQL](https://www.postgresql.org/) via [GORM](https://gorm.io/) |
-| **Cache / Sessions** | [Redis](https://redis.io/) via [Redigo](https://github.com/gomodule/redigo) + [SCS](https://github.com/alexedwards/scs) |
-| **Migrations**       | [Atlas](https://atlasgo.io/) (schema-as-code from GORM models)   |
-| **Tracing**          | [OpenTelemetry](https://opentelemetry.io/) + [Jaeger](https://www.jaegertracing.io/) |
-| **Metrics**          | [Prometheus](https://prometheus.io/) via OTel Prometheus Exporter |
+| Category             | Technology                                                                                                                                               |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Language**         | [Go 1.25+](https://go.dev/)                                                                                                                              |
+| **HTTP Framework**   | [Fuego](https://github.com/go-fuego/fuego)                                                                                                               |
+| **Database**         | [PostgreSQL](https://www.postgresql.org/) via [GORM](https://gorm.io/)                                                                                   |
+| **Cache / Sessions** | [Redis](https://redis.io/) via [Redigo](https://github.com/gomodule/redigo) + [SCS](https://github.com/alexedwards/scs)                                  |
+| **Migrations**       | [Atlas](https://atlasgo.io/) (schema-as-code from GORM models)                                                                                           |
+| **Tracing**          | [OpenTelemetry](https://opentelemetry.io/) + [Jaeger](https://www.jaegertracing.io/)                                                                     |
+| **Metrics**          | [Prometheus](https://prometheus.io/) via OTel Prometheus Exporter                                                                                        |
 | **Logs**             | [`log/slog`](https://pkg.go.dev/log/slog) → [Loki](https://grafana.com/oss/loki/) via [Promtail](https://grafana.com/docs/loki/latest/clients/promtail/) |
-| **Dashboards**       | [Grafana](https://grafana.com/) (pre-configured with all data sources) |
-| **Logging**          | [`log/slog`](https://pkg.go.dev/log/slog) (structured JSON logs) |
-| **API Docs**         | OpenAPI 3 auto-generated + [Scalar UI](https://github.com/scalar/scalar) |
-| **Hot Reload**       | [Air](https://github.com/air-verse/air)                          |
-| **Containers**       | [Docker Compose](https://docs.docker.com/compose/)               |
+| **Dashboards**       | [Grafana](https://grafana.com/) (pre-configured with all data sources)                                                                                   |
+| **Logging**          | [`log/slog`](https://pkg.go.dev/log/slog) (structured JSON logs)                                                                                         |
+| **API Docs**         | OpenAPI 3 auto-generated + [Scalar UI](https://github.com/scalar/scalar)                                                                                 |
+| **Hot Reload**       | [Air](https://github.com/air-verse/air)                                                                                                                  |
+| **Containers**       | [Docker Compose](https://docs.docker.com/compose/)                                                                                                       |
 
 ---
 
@@ -27,39 +27,39 @@ A production-ready Go REST API boilerplate built with modern tooling and best pr
 ```
                           ┌──────────────────────────────────────────────────┐
                           │                   Grafana :3000                  │
-                          │  ┌──────────┐  ┌──────────┐  ┌──────────────┐  │
-                          │  │Dashboards│  │  Explore  │  │    Alerts    │  │
-                          │  └────┬─────┘  └────┬─────┘  └──────┬───────┘  │
-                          └───────┼─────────────┼───────────────┼──────────┘
+                          │  ┌──────────┐  ┌──────────┐  ┌──────────────┐    │
+                          │  │Dashboards│  │  Explore  │  │    Alerts    │   │
+                          │  └────┬─────┘  └────┬─────┘  └──────┬───────┘    │
+                          └───────┼─────────────┼───────────────┼────────────┘
                                   │             │               │
                  ┌────────────────┼─────────────┼───────────────┼────────────┐
                  │                ▼             ▼               ▼            │
-                 │  ┌──────────────────┐ ┌───────────┐ ┌──────────────┐     │
-                 │  │ Prometheus :9090 │ │ Loki :3100│ │ Jaeger :16686│     │
-                 │  └───────┬──────────┘ └─────┬─────┘ └──────┬───────┘     │
+                 │  ┌──────────────────┐ ┌───────────┐ ┌──────────────┐      │
+                 │  │ Prometheus :9090 │ │ Loki :3100│ │ Jaeger :16686│      │
+                 │  └───────┬──────────┘ └─────┬─────┘ └──────┬───────┘      │
                  │          │ scrape            │ push          │ OTLP       │
                  │          │                   │               │            │
                  │          │            ┌──────┴──────┐        │            │
                  │          │            │  Promtail   │        │            │
                  │          │            └──────┬──────┘        │            │
                  │          │                   │ tail          │            │
-                 └──────────┼───────────────────┼──────────────┼────────────┘
+                 └──────────┼───────────────────┼──────────────┼─────────────┘
                             │                   │              │
                    ┌────────┼───────────────────┼──────────────┼────────┐
                    │        ▼                   ▼              ▲        │
-                   │   GET /metrics        logs/app.log    OTLP HTTP   │
+                   │   GET /metrics        logs/app.log    OTLP HTTP    │
                    │        │                   │              │        │
                    │        └───────────────────┴──────────────┘        │
                    │                   Go App :8080                     │
                    │           slog (JSON) + OTel + Prometheus          │
-                   └───────────────────────────────────────────────────┘
+                   └────────────────────────────────────────────────────┘
 ```
 
-| Signal     | Flow                                                        |
-| ---------- | ----------------------------------------------------------- |
-| **Traces** | App → OTLP HTTP → Jaeger → Grafana                         |
-| **Metrics**| Prometheus scrapes `GET /metrics` → Grafana                 |
-| **Logs**   | App → `slog` JSON → `logs/app.log` → Promtail → Loki → Grafana |
+| Signal      | Flow                                                           |
+| ----------- | -------------------------------------------------------------- |
+| **Traces**  | App → OTLP HTTP → Jaeger → Grafana                             |
+| **Metrics** | Prometheus scrapes `GET /metrics` → Grafana                    |
+| **Logs**    | App → `slog` JSON → `logs/app.log` → Promtail → Loki → Grafana |
 
 ---
 
@@ -138,15 +138,15 @@ The project follows a **layered architecture** with clear separation of concerns
 Request → Routes → Middlewares → Controllers → Services → Repositories → Database
 ```
 
-| Layer            | Responsibility                                                 |
-| ---------------- | -------------------------------------------------------------- |
-| **Routes**       | Maps HTTP endpoints to controller handlers                     |
-| **Middlewares**   | Cross-cutting concerns (CORS, sessions, auth)                 |
-| **Controllers**  | Parses requests, validates input, returns responses            |
-| **Services**     | Business logic and orchestration                               |
-| **Repositories** | Data access abstraction over GORM                              |
-| **Models**       | GORM entity definitions (also used by Atlas for migrations)    |
-| **Container**    | Wires all dependencies together (poor man's DI)                |
+| Layer            | Responsibility                                              |
+| ---------------- | ----------------------------------------------------------- |
+| **Routes**       | Maps HTTP endpoints to controller handlers                  |
+| **Middlewares**  | Cross-cutting concerns (CORS, sessions, auth)               |
+| **Controllers**  | Parses requests, validates input, returns responses         |
+| **Services**     | Business logic and orchestration                            |
+| **Repositories** | Data access abstraction over GORM                           |
+| **Models**       | GORM entity definitions (also used by Atlas for migrations) |
+| **Container**    | Wires all dependencies together (poor man's DI)             |
 
 ---
 
@@ -155,7 +155,7 @@ Request → Routes → Middlewares → Controllers → Services → Repositories
 - **Go** 1.25+
 - **Docker** & **Docker Compose** (for PostgreSQL, Redis, Jaeger, Grafana, Prometheus, Loki)
 - **Atlas CLI** — [install guide](https://atlasgo.io/getting-started#installation)
-- **Air** *(optional, for hot reload)* — `go install github.com/air-verse/air@latest`
+- **Air** _(optional, for hot reload)_ — `go install github.com/air-verse/air@latest`
 
 ---
 
@@ -178,22 +178,22 @@ cp .env.example .env
 
 Required environment variables:
 
-| Variable                       | Default                     | Description                    |
-| ------------------------------ | --------------------------- | ------------------------------ |
-| `DB_HOST`                      | `localhost`                 | PostgreSQL host                |
-| `DB_PORT`                      | `5432`                      | PostgreSQL port                |
-| `DB_USER`                      | `postgres`                  | PostgreSQL user                |
-| `DB_PASSWORD`                  | `postgres`                  | PostgreSQL password            |
-| `DB_NAME`                      | `mcs_dctfweb_sender`        | PostgreSQL database name       |
-| `DB_SSLMODE`                   | `disable`                   | PostgreSQL SSL mode            |
-| `REDIS_HOST`                   | `localhost`                 | Redis host                     |
-| `REDIS_PORT`                   | `6379`                      | Redis port                     |
-| `REDIS_PASSWORD`               |                             | Redis password (optional)      |
-| `OTEL_SERVICE_NAME`            | `go-project-base`           | OpenTelemetry service name     |
-| `OTEL_EXPLOERER_OTLP_ENDPOINT` | `localhost:4318`            | OTLP HTTP collector endpoint   |
-| `BASE_URL`                     | `http://localhost:8080`     | Base URL for Scalar API docs   |
-| `APP_NAME`                     | `Go Project Base`           | Application name (Scalar UI)   |
-| `LOG_LEVEL`                    | `info`                      | Log level (debug/info/warn/error) |
+| Variable                       | Default                 | Description                       |
+| ------------------------------ | ----------------------- | --------------------------------- |
+| `DB_HOST`                      | `localhost`             | PostgreSQL host                   |
+| `DB_PORT`                      | `5432`                  | PostgreSQL port                   |
+| `DB_USER`                      | `postgres`              | PostgreSQL user                   |
+| `DB_PASSWORD`                  | `postgres`              | PostgreSQL password               |
+| `DB_NAME`                      | `mcs_dctfweb_sender`    | PostgreSQL database name          |
+| `DB_SSLMODE`                   | `disable`               | PostgreSQL SSL mode               |
+| `REDIS_HOST`                   | `localhost`             | Redis host                        |
+| `REDIS_PORT`                   | `6379`                  | Redis port                        |
+| `REDIS_PASSWORD`               |                         | Redis password (optional)         |
+| `OTEL_SERVICE_NAME`            | `go-project-base`       | OpenTelemetry service name        |
+| `OTEL_EXPLOERER_OTLP_ENDPOINT` | `localhost:4318`        | OTLP HTTP collector endpoint      |
+| `BASE_URL`                     | `http://localhost:8080` | Base URL for Scalar API docs      |
+| `APP_NAME`                     | `Go Project Base`       | Application name (Scalar UI)      |
+| `LOG_LEVEL`                    | `info`                  | Log level (debug/info/warn/error) |
 
 ### 3. Start infrastructure
 
@@ -240,20 +240,20 @@ Once running, visit the interactive API docs powered by Scalar:
 
 ### Available Routes
 
-| Method   | Path                     | Description            | Auth     |
-| -------- | ------------------------ | ---------------------- | -------- |
-| `GET`    | `/`                      | Health check (simple)  | Public   |
-| `GET`    | `/health`                | Health check (detailed)| Public   |
-| `GET`    | `/metrics`               | Prometheus metrics     | Public   |
-| `POST`   | `/api/v1/auth/register` | Register a new user    | Public   |
-| `POST`   | `/api/v1/auth/login`    | Login                  | Public   |
-| `POST`   | `/api/v1/auth/logout`   | Logout                 | Public   |
-| `GET`    | `/api/v1/auth/me`        | Current user info      | Public   |
-| `GET`    | `/api/v1/users`          | List all users         | Public   |
-| `POST`   | `/api/v1/users`          | Create user            | Public   |
-| `GET`    | `/api/v1/users/{user_id}`| Get user by ID         | Public   |
-| `PUT`    | `/api/v1/users/{user_id}`| Update user            | Public   |
-| `DELETE` | `/api/v1/users/{user_id}`| Delete user            | Public   |
+| Method   | Path                      | Description             | Auth   |
+| -------- | ------------------------- | ----------------------- | ------ |
+| `GET`    | `/`                       | Health check (simple)   | Public |
+| `GET`    | `/health`                 | Health check (detailed) | Public |
+| `GET`    | `/metrics`                | Prometheus metrics      | Public |
+| `POST`   | `/api/v1/auth/register`   | Register a new user     | Public |
+| `POST`   | `/api/v1/auth/login`      | Login                   | Public |
+| `POST`   | `/api/v1/auth/logout`     | Logout                  | Public |
+| `GET`    | `/api/v1/auth/me`         | Current user info       | Public |
+| `GET`    | `/api/v1/users`           | List all users          | Public |
+| `POST`   | `/api/v1/users`           | Create user             | Public |
+| `GET`    | `/api/v1/users/{user_id}` | Get user by ID          | Public |
+| `PUT`    | `/api/v1/users/{user_id}` | Update user             | Public |
+| `DELETE` | `/api/v1/users/{user_id}` | Delete user             | Public |
 
 ---
 
@@ -306,11 +306,11 @@ make migrate-status
 
 ### Dashboards & UIs
 
-| Tool           | URL                                       | Credentials       |
-| -------------- | ----------------------------------------- | ------------------ |
-| **Grafana**    | [http://localhost:3000](http://localhost:3000) | `admin` / `admin` |
-| **Jaeger**     | [http://localhost:16686](http://localhost:16686) | —               |
-| **Prometheus** | [http://localhost:9090](http://localhost:9090) | —                 |
+| Tool           | URL                                              | Credentials       |
+| -------------- | ------------------------------------------------ | ----------------- |
+| **Grafana**    | [http://localhost:3000](http://localhost:3000)   | `admin` / `admin` |
+| **Jaeger**     | [http://localhost:16686](http://localhost:16686) | —                 |
+| **Prometheus** | [http://localhost:9090](http://localhost:9090)   | —                 |
 
 ### Logging (`slog` → Loki)
 
@@ -320,12 +320,12 @@ The project uses Go's standard library **`log/slog`** with a JSON handler for st
 
 Set the `LOG_LEVEL` environment variable:
 
-| Level   | Description                                        |
-| ------- | -------------------------------------------------- |
-| `debug` | Verbose output, includes source file locations     |
-| `info`  | General operational messages (default)             |
-| `warn`  | Warning conditions                                 |
-| `error` | Error conditions only                              |
+| Level   | Description                                    |
+| ------- | ---------------------------------------------- |
+| `debug` | Verbose output, includes source file locations |
+| `info`  | General operational messages (default)         |
+| `warn`  | Warning conditions                             |
+| `error` | Error conditions only                          |
 
 #### Example output
 
@@ -366,13 +366,13 @@ The app exposes a `GET /metrics` endpoint powered by the **OTel Prometheus expor
 
 Available metrics include:
 
-| Metric                                      | Type      | Description                    |
-| ------------------------------------------- | --------- | ------------------------------ |
-| `http_server_request_duration_seconds`      | Histogram | HTTP request latency by route  |
-| `http_server_active_requests`               | Gauge     | Currently in-flight requests   |
-| `go_goroutines`                             | Gauge     | Number of active goroutines    |
-| `go_memstats_alloc_bytes`                   | Gauge     | Allocated heap memory          |
-| `go_gc_duration_seconds`                    | Summary   | GC pause durations             |
+| Metric                                 | Type      | Description                   |
+| -------------------------------------- | --------- | ----------------------------- |
+| `http_server_request_duration_seconds` | Histogram | HTTP request latency by route |
+| `http_server_active_requests`          | Gauge     | Currently in-flight requests  |
+| `go_goroutines`                        | Gauge     | Number of active goroutines   |
+| `go_memstats_alloc_bytes`              | Gauge     | Allocated heap memory         |
+| `go_gc_duration_seconds`               | Summary   | GC pause durations            |
 
 ### Tracing (Jaeger)
 
@@ -392,35 +392,35 @@ In Grafana, the Loki data source is configured with **derived fields** that extr
 
 Grafana comes with a **pre-provisioned dashboard** (`Go Project Base`) that includes:
 
-| Panel                  | Data Source | Description                               |
-| ---------------------- | ----------- | ----------------------------------------- |
-| HTTP Request Rate      | Prometheus  | Requests per second by route and method   |
-| HTTP Latency (p95)     | Prometheus  | 95th percentile latency by route          |
-| HTTP Error Rate        | Prometheus  | 4xx/5xx errors per second                 |
-| Active Requests        | Prometheus  | Currently in-flight requests              |
-| Total Requests (5m)    | Prometheus  | Total requests in the last 5 minutes      |
-| Error Rate %           | Prometheus  | 5xx errors as a percentage of all traffic |
-| Avg Latency            | Prometheus  | Average response time                     |
-| Memory Usage           | Prometheus  | Alloc, Sys, Heap In-Use                   |
-| Goroutines             | Prometheus  | Active goroutine count over time          |
-| GC Cycles              | Prometheus  | Garbage collection frequency              |
-| Error Logs             | Loki        | Live stream of ERROR-level log entries    |
-| Log Volume by Level    | Loki        | Stacked chart of logs by level over time  |
-| All Logs               | Loki        | Full log stream with JSON parsing         |
+| Panel               | Data Source | Description                               |
+| ------------------- | ----------- | ----------------------------------------- |
+| HTTP Request Rate   | Prometheus  | Requests per second by route and method   |
+| HTTP Latency (p95)  | Prometheus  | 95th percentile latency by route          |
+| HTTP Error Rate     | Prometheus  | 4xx/5xx errors per second                 |
+| Active Requests     | Prometheus  | Currently in-flight requests              |
+| Total Requests (5m) | Prometheus  | Total requests in the last 5 minutes      |
+| Error Rate %        | Prometheus  | 5xx errors as a percentage of all traffic |
+| Avg Latency         | Prometheus  | Average response time                     |
+| Memory Usage        | Prometheus  | Alloc, Sys, Heap In-Use                   |
+| Goroutines          | Prometheus  | Active goroutine count over time          |
+| GC Cycles           | Prometheus  | Garbage collection frequency              |
+| Error Logs          | Loki        | Live stream of ERROR-level log entries    |
+| Log Volume by Level | Loki        | Stacked chart of logs by level over time  |
+| All Logs            | Loki        | Full log stream with JSON parsing         |
 
 ---
 
 ## Docker Compose Services
 
-| Service      | Image                              | Ports                              | Purpose                        |
-| ------------ | ---------------------------------- | ---------------------------------- | ------------------------------ |
-| `db`         | `postgres:latest`                  | `5432`                             | Primary database               |
-| `redis`      | `redis:7-alpine`                   | `6379`                             | Session store & cache          |
-| `jaeger`     | `jaegertracing/all-in-one:latest`  | `16686` (UI), `4317`/`4318` (OTLP) | Distributed tracing           |
-| `loki`       | `grafana/loki:3.5.0`              | `3100`                             | Log aggregation                |
-| `promtail`   | `grafana/promtail:3.5.0`          | —                                  | Log collection agent           |
-| `prometheus` | `prom/prometheus:v3.4.1`          | `9090`                             | Metrics storage & querying     |
-| `grafana`    | `grafana/grafana:11.6.0`          | `3000`                             | Dashboards & visualization     |
+| Service      | Image                             | Ports                              | Purpose                    |
+| ------------ | --------------------------------- | ---------------------------------- | -------------------------- |
+| `db`         | `postgres:latest`                 | `5432`                             | Primary database           |
+| `redis`      | `redis:7-alpine`                  | `6379`                             | Session store & cache      |
+| `jaeger`     | `jaegertracing/all-in-one:latest` | `16686` (UI), `4317`/`4318` (OTLP) | Distributed tracing        |
+| `loki`       | `grafana/loki:3.5.0`              | `3100`                             | Log aggregation            |
+| `promtail`   | `grafana/promtail:3.5.0`          | —                                  | Log collection agent       |
+| `prometheus` | `prom/prometheus:v3.4.1`          | `9090`                             | Metrics storage & querying |
+| `grafana`    | `grafana/grafana:11.6.0`          | `3000`                             | Dashboards & visualization |
 
 ---
 
