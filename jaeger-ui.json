@@ -1,0 +1,21 @@
+{
+  "themes": {
+    "enabled": true
+  },
+  "dependencies": {
+    "dagMaxNumServices": 200,
+    "menuEnabled": true
+  },
+  "monitor": {
+    "menuEnabled": true
+  },
+  "criticalPathEnabled": true,
+  "topTagPrefixes": ["http.", "db.", "rpc."],
+  "search": {
+    "maxLookback": {
+      "label": "7 Days",
+      "value": "7d"
+    },
+    "maxLimit": 1500
+  }
+}

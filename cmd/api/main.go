@@ -36,6 +36,13 @@ func main() {
 		_ = otelShutdown(ctx)
 	}()
 
+	// Initialize Prometheus metrics
+	metricsHandler, err := config.InitMetrics()
+	if err != nil {
+		slog.Error("Failed to initialize metrics", "error", err)
+		os.Exit(1)
+	}
+
 	// Initialize dependency container
 	c, err := container.NewContainer()
 	if err != nil {
@@ -57,7 +64,7 @@ func main() {
 	)
 
 	// Configure routes
-	routes.SetupRoutes(s, c)
+	routes.SetupRoutes(s, c, metricsHandler)
 
 	slog.Info("Server starting", "addr", ":8080")
 

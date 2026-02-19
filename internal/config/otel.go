@@ -5,9 +5,12 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"strings"
 	"time"
 
+	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
+	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.39.0"
@@ -26,8 +29,12 @@ func InitOtel(ctx context.Context) (OtelShutdown, error) {
 
 	otelEndpoint := os.Getenv("OTEL_EXPLOERER_OTLP_ENDPOINT")
 	if otelEndpoint == "" {
-		otelEndpoint = "http://localhost:4318"
+		otelEndpoint = "localhost:4318"
 	}
+
+	// WithEndpoint expects host:port, not a full URL — strip scheme if present
+	otelEndpoint = strings.TrimPrefix(otelEndpoint, "http://")
+	otelEndpoint = strings.TrimPrefix(otelEndpoint, "https://")
 
 	// Resource with service info
 	res, err := resource.Merge(
@@ -39,7 +46,7 @@ func InitOtel(ctx context.Context) (OtelShutdown, error) {
 		),
 	)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create OTel resouce: %w", err)
+		return nil, fmt.Errorf("failed to create OTel resource: %w", err)
 	}
 
 	// Exporter OTLP via HTTP
@@ -57,6 +64,15 @@ func InitOtel(ctx context.Context) (OtelShutdown, error) {
 		sdktrace.WithResource(res),
 		sdktrace.WithSampler(sdktrace.AlwaysSample()),
 	)
+
+	// Register as global TracerProvider so otelhttp and otelgorm pick it up
+	otel.SetTracerProvider(tp)
+
+	// Set global propagator for trace context propagation across services
+	otel.SetTextMapPropagator(propagation.NewCompositeTextMapPropagator(
+		propagation.TraceContext{},
+		propagation.Baggage{},
+	))
 
 	slog.Info("OpenTelemetry initialized",
 		"service", serviceName,

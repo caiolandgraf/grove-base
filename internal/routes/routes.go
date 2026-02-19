@@ -1,6 +1,8 @@
 package routes
 
 import (
+	"net/http"
+
 	"github.com/caiolandgraf/go-project-base/internal/container"
 	"github.com/caiolandgraf/go-project-base/internal/middlewares"
 	"github.com/go-fuego/fuego"
@@ -8,9 +10,17 @@ import (
 )
 
 // SetupRoutes configures all routes using the container
-func SetupRoutes(s *fuego.Server, c *container.Container) {
+func SetupRoutes(
+	s *fuego.Server,
+	c *container.Container,
+	metricsHandler http.Handler,
+) {
 	// OpenTelemetry Middleware
 	fuego.Use(s, otelhttp.NewMiddleware("go-project-base"))
+
+	// Route tag middleware — reads r.Pattern (Go 1.22+) and sets http.route
+	// on the otelhttp labeler (Prometheus metrics) and span (Jaeger traces).
+	fuego.Use(s, middlewares.RouteTagMiddleware)
 
 	// CORS Middleware global
 	fuego.Use(s, middlewares.CORSMiddleware(middlewares.DefaultCORSConfig()))
@@ -21,6 +31,9 @@ func SetupRoutes(s *fuego.Server, c *container.Container) {
 	// Health check
 	fuego.Get(s, "/", healthCheck)
 	fuego.Get(s, "/health", healthCheckDetailed(c))
+
+	// Prometheus metrics endpoint
+	fuego.GetStd(s, "/metrics", metricsHandler.ServeHTTP)
 
 	// API v1
 	api := fuego.Group(s, "/api/v1")

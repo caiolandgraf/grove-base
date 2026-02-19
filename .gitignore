@@ -102,6 +102,12 @@ debug.test
 build-errors.log
 
 # ========================
+# Logs (Promtail collection)
+# ========================
+logs/*
+!logs/.gitkeep
+
+# ========================
 # Testing
 # ========================
 testdata/
@@ -117,6 +123,11 @@ testdata/
 # Documentation artifacts
 # ========================
 doc/openapi.json
+
+# ========================
+# Grafana / Observability
+# ========================
+grafana_data/
 
 # ========================
 # Misc
