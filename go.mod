@@ -1,6 +1,6 @@
 module github.com/caiolandgraf/go-project-base
 
-go 1.25.5
+go 1.25.7
 
 require (
 	github.com/alexedwards/scs/redisstore v0.0.0-20251002162104-209de6e426de
@@ -26,6 +26,7 @@ require (
 require (
 	ariga.io/atlas-provider-gorm v0.6.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
+	github.com/caiolandgraf/gest v0.1.0 // indirect
 	github.com/cenkalti/backoff/v5 v5.0.3 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
