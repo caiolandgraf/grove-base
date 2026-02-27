@@ -1,0 +1,135 @@
+# ========================
+# Environment & Secrets
+# ========================
+.env
+.env.*
+!.env.example
+
+# ========================
+# Go
+# ========================
+bin/
+tmp/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+*.prof
+*.pprof
+go.sum
+vendor/
+coverage.out
+coverage.html
+coverage.txt
+
+# ========================
+# Air (hot reload)
+# ========================
+tmp/
+
+# ========================
+# IDE & Editors
+# ========================
+
+# VSCode
+.vscode/
+*.code-workspace
+
+# GoLand / JetBrains
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Vim / Neovim
+*.swp
+*.swo
+*~
+.netrwhist
+Session.vim
+tags
+
+# Emacs
+*~
+\#*\#
+.#*
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# ========================
+# OS generated files
+# ========================
+
+# macOS
+.DS_Store
+.DS_Store?
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+Icon?
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# Linux
+.directory
+
+# ========================
+# Docker
+# ========================
+docker-compose.override.yml
+.docker/
+
+# ========================
+# Debugging
+# ========================
+__debug_bin*
+debug
+debug.test
+*.log
+build-errors.log
+
+
+
+# ========================
+# Testing
+# ========================
+testdata/
+*.coverprofile
+
+# ========================
+# Atlas (migrations tool)
+# ========================
+# Keep migrations/ tracked, but ignore local atlas state
+.atlas/
+
+# ========================
+# Documentation artifacts
+# ========================
+doc/openapi.json
+
+# ========================
+# Grafana / Observability
+# ========================
+grafana_data/
+
+# ========================
+# Misc
+# ========================
+*.bak
+*.tmp
+*.temp
+*.pid
+*.seed
