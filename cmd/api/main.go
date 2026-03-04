@@ -16,9 +16,15 @@ import (
 )
 
 func main() {
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+		Level: slog.LevelDebug,
+	}))
+
+	slog.SetDefault(logger)
+
 	// Load .env
 	if err := godotenv.Load(); err != nil {
-		slog.Info(".env not found")
+		slog.Error(".env not found")
 		os.Exit(1)
 	}
 
