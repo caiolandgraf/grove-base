@@ -46,7 +46,7 @@
       "type": "timeseries",
       "targets": [
         {
-          "expr": "sum(rate(http_server_request_duration_seconds_count{service=\"go-project-base\"}[1m])) by (http_route, http_request_method)",
+          "expr": "sum(rate(http_server_request_duration_seconds_count{service=\"grove-app\"}[1m])) by (http_route, http_request_method)",
           "legendFormat": "{{http_request_method}} {{http_route}}"
         }
       ]
@@ -83,7 +83,7 @@
       "type": "timeseries",
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, sum(rate(http_server_request_duration_seconds_bucket{service=\"go-project-base\"}[5m])) by (le, http_route))",
+          "expr": "histogram_quantile(0.95, sum(rate(http_server_request_duration_seconds_bucket{service=\"grove-app\"}[5m])) by (le, http_route))",
           "legendFormat": "{{http_route}}"
         }
       ]
@@ -128,7 +128,7 @@
       "type": "timeseries",
       "targets": [
         {
-          "expr": "sum(rate(http_server_request_duration_seconds_count{service=\"go-project-base\", http_response_status_code=~\"4..|5..\"}[1m])) by (http_response_status_code, http_route)",
+          "expr": "sum(rate(http_server_request_duration_seconds_count{service=\"grove-app\", http_response_status_code=~\"4..|5..\"}[1m])) by (http_response_status_code, http_route)",
           "legendFormat": "{{http_response_status_code}} {{http_route}}"
         }
       ]
@@ -161,7 +161,7 @@
       "type": "stat",
       "targets": [
         {
-          "expr": "sum(http_server_active_requests{service=\"go-project-base\"})",
+          "expr": "sum(http_server_active_requests{service=\"grove-app\"})",
           "legendFormat": "active"
         }
       ]
@@ -190,7 +190,7 @@
       "type": "stat",
       "targets": [
         {
-          "expr": "sum(increase(http_server_request_duration_seconds_count{service=\"go-project-base\"}[5m]))",
+          "expr": "sum(increase(http_server_request_duration_seconds_count{service=\"grove-app\"}[5m]))",
           "legendFormat": "total"
         }
       ]
@@ -222,7 +222,7 @@
       "type": "stat",
       "targets": [
         {
-          "expr": "sum(rate(http_server_request_duration_seconds_count{service=\"go-project-base\", http_response_status_code=~\"5..\"}[5m])) / sum(rate(http_server_request_duration_seconds_count{service=\"go-project-base\"}[5m]))",
+          "expr": "sum(rate(http_server_request_duration_seconds_count{service=\"grove-app\", http_response_status_code=~\"5..\"}[5m])) / sum(rate(http_server_request_duration_seconds_count{service=\"grove-app\"}[5m]))",
           "legendFormat": "error %"
         }
       ]
@@ -255,7 +255,7 @@
       "type": "stat",
       "targets": [
         {
-          "expr": "sum(rate(http_server_request_duration_seconds_sum{service=\"go-project-base\"}[5m])) / sum(rate(http_server_request_duration_seconds_count{service=\"go-project-base\"}[5m]))",
+          "expr": "sum(rate(http_server_request_duration_seconds_sum{service=\"grove-app\"}[5m])) / sum(rate(http_server_request_duration_seconds_count{service=\"grove-app\"}[5m]))",
           "legendFormat": "avg"
         }
       ]
@@ -292,15 +292,15 @@
       "type": "timeseries",
       "targets": [
         {
-          "expr": "go_memstats_alloc_bytes{service=\"go-project-base\"}",
+          "expr": "go_memstats_alloc_bytes{service=\"grove-app\"}",
           "legendFormat": "Alloc"
         },
         {
-          "expr": "go_memstats_sys_bytes{service=\"go-project-base\"}",
+          "expr": "go_memstats_sys_bytes{service=\"grove-app\"}",
           "legendFormat": "Sys"
         },
         {
-          "expr": "go_memstats_heap_inuse_bytes{service=\"go-project-base\"}",
+          "expr": "go_memstats_heap_inuse_bytes{service=\"grove-app\"}",
           "legendFormat": "Heap In-Use"
         }
       ]
@@ -330,7 +330,7 @@
       "type": "timeseries",
       "targets": [
         {
-          "expr": "go_goroutines{service=\"go-project-base\"}",
+          "expr": "go_goroutines{service=\"grove-app\"}",
           "legendFormat": "goroutines"
         }
       ]
@@ -360,7 +360,7 @@
       "type": "timeseries",
       "targets": [
         {
-          "expr": "rate(go_gc_duration_seconds_count{service=\"go-project-base\"}[1m])",
+          "expr": "rate(go_gc_duration_seconds_count{service=\"grove-app\"}[1m])",
           "legendFormat": "GC/s"
         }
       ]
@@ -390,7 +390,7 @@
       "type": "logs",
       "targets": [
         {
-          "expr": "{job=\"go-project-base\"} | json | level = \"ERROR\"",
+          "expr": "{job=\"grove-app\"} | json | level = \"ERROR\"",
           "legendFormat": ""
         }
       ]
@@ -456,7 +456,7 @@
       "type": "timeseries",
       "targets": [
         {
-          "expr": "sum by (level) (count_over_time({job=\"go-project-base\"} | json [1m]))",
+          "expr": "sum by (level) (count_over_time({job=\"grove-app\"} | json [1m]))",
           "legendFormat": "{{level}}"
         }
       ]
@@ -479,7 +479,7 @@
       "type": "logs",
       "targets": [
         {
-          "expr": "{job=\"go-project-base\"} | json",
+          "expr": "{job=\"grove-app\"} | json",
           "legendFormat": ""
         }
       ]
@@ -561,7 +561,7 @@
       "type": "timeseries",
       "targets": [
         {
-          "expr": "sum(rate(http_server_request_duration_seconds_count{service=\"go-project-base\"}[1m])) by (http_response_status_code, http_route, http_request_method)",
+          "expr": "sum(rate(http_server_request_duration_seconds_count{service=\"grove-app\"}[1m])) by (http_response_status_code, http_route, http_request_method)",
           "legendFormat": "{{http_response_status_code}} {{http_request_method}} {{http_route}}",
           "refId": "A"
         }
@@ -599,7 +599,7 @@
       "type": "timeseries",
       "targets": [
         {
-          "expr": "sum(rate(http_server_request_duration_seconds_count{service=\"go-project-base\"}[1m])) by (http_route, http_request_method)",
+          "expr": "sum(rate(http_server_request_duration_seconds_count{service=\"grove-app\"}[1m])) by (http_route, http_request_method)",
           "legendFormat": "{{http_request_method}} {{http_route}}",
           "refId": "A"
         }
@@ -664,21 +664,21 @@
       "type": "table",
       "targets": [
         {
-          "expr": "histogram_quantile(0.50, sum(rate(http_server_request_duration_seconds_bucket{service=\"go-project-base\"}[5m])) by (le, http_route, http_request_method))",
+          "expr": "histogram_quantile(0.50, sum(rate(http_server_request_duration_seconds_bucket{service=\"grove-app\"}[5m])) by (le, http_route, http_request_method))",
           "legendFormat": "p50",
           "format": "table",
           "instant": true,
           "refId": "A"
         },
         {
-          "expr": "histogram_quantile(0.95, sum(rate(http_server_request_duration_seconds_bucket{service=\"go-project-base\"}[5m])) by (le, http_route, http_request_method))",
+          "expr": "histogram_quantile(0.95, sum(rate(http_server_request_duration_seconds_bucket{service=\"grove-app\"}[5m])) by (le, http_route, http_request_method))",
           "legendFormat": "p95",
           "format": "table",
           "instant": true,
           "refId": "B"
         },
         {
-          "expr": "histogram_quantile(0.99, sum(rate(http_server_request_duration_seconds_bucket{service=\"go-project-base\"}[5m])) by (le, http_route, http_request_method))",
+          "expr": "histogram_quantile(0.99, sum(rate(http_server_request_duration_seconds_bucket{service=\"grove-app\"}[5m])) by (le, http_route, http_request_method))",
           "legendFormat": "p99",
           "format": "table",
           "instant": true,
@@ -713,6 +713,6 @@
   "timepicker": {},
   "timezone": "browser",
   "title": "Go Project Base",
-  "uid": "go-project-base",
+  "uid": "grove-app",
   "version": 1
 }

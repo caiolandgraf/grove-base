@@ -24,7 +24,7 @@ type OtelShutdown func(ctx context.Context) error
 func InitOtel(ctx context.Context) (OtelShutdown, error) {
 	serviceName := os.Getenv("OTEL_SERVICE_NAME")
 	if serviceName == "" {
-		serviceName = "go-project-base"
+		serviceName = "grove-app"
 	}
 
 	otelEndpoint := os.Getenv("OTEL_EXPLOERER_OTLP_ENDPOINT")

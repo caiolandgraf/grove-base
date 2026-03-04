@@ -12,7 +12,7 @@ data "external_schema" "gorm" {
 
 env "local" {
   src = data.external_schema.gorm.url
-  url = "postgres://postgres:postgres@localhost:5432/mcs_dctfweb_sender?sslmode=disable"
+  url = "postgres://grove_user:grove_password@localhost:5432/grove_db?sslmode=disable"
 
   dev = "docker://postgres/15/dev"
 

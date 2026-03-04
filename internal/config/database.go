@@ -34,7 +34,7 @@ func LoadDatabaseConfig() *DatabaseConfig {
 		Port:     getEnv("DB_PORT", "5432"),
 		User:     getEnv("DB_USER", "postgres"),
 		Password: getEnv("DB_PASSWORD", "postgres"),
-		DBName:   getEnv("DB_NAME", "mcs_dctfweb_sender"),
+		DBName:   getEnv("DB_NAME", "grove_db"),
 		SSLMode:  getEnv("DB_SSLMODE", "disable"),
 	}
 }

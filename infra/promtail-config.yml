@@ -9,12 +9,12 @@ clients:
   - url: http://loki:3100/loki/api/v1/push
 
 scrape_configs:
-  - job_name: go-project-base
+  - job_name: grove-app
     static_configs:
       - targets:
           - localhost
         labels:
-          job: go-project-base
+          job: grove-app
           environment: development
           __path__: /var/log/app/*.log
     pipeline_stages:

@@ -3,7 +3,7 @@ package routes
 import (
 	"github.com/caiolandgraf/go-project-base/internal/app"
 	"github.com/caiolandgraf/go-project-base/internal/controllers"
-	"github.com/caiolandgraf/go-project-base/internal/middlewares"
+	"github.com/caiolandgraf/go-project-base/internal/middleware"
 	"github.com/go-fuego/fuego"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
@@ -30,17 +30,17 @@ func SetupRoutes(s *fuego.Server) {
 	authController := controllers.NewAuthController(app.Session)
 
 	// OpenTelemetry Middleware
-	fuego.Use(s, otelhttp.NewMiddleware("go-project-base"))
+	fuego.Use(s, otelhttp.NewMiddleware("grove-app"))
 
 	// Route tag middleware — reads r.Pattern (Go 1.22+) and sets http.route
 	// on the otelhttp labeler (Prometheus metrics) and span (Jaeger traces).
-	fuego.Use(s, middlewares.RouteTagMiddleware)
+	fuego.Use(s, middleware.RouteTagMiddleware)
 
 	// CORS Middleware global
-	fuego.Use(s, middlewares.CORSMiddleware(middlewares.DefaultCORSConfig()))
+	fuego.Use(s, middleware.CORSMiddleware(middleware.DefaultCORSConfig()))
 
 	// Session Middleware global
-	fuego.Use(s, middlewares.SessionMiddleware(app.Session))
+	fuego.Use(s, middleware.SessionMiddleware(app.Session))
 
 	// Health check
 	fuego.Get(s, "/", healthCheck)
@@ -62,7 +62,7 @@ func SetupRoutes(s *fuego.Server) {
 	// ========== USER ROUTES ==========
 	users := fuego.Group(api, "/users")
 	// Auth Middleware if needed for all user routes
-	// fuego.Use(users, middlewares.AuthRequired(app.Session))
+	// fuego.Use(users, middleware.AuthRequired(app.Session))
 	fuego.Get(users, "/", controllers.ListUsers)
 	fuego.Post(users, "/", controllers.CreateUser)
 	fuego.Get(users, "/{user_id}", controllers.GetUser)
