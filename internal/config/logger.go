@@ -11,7 +11,7 @@ import (
 // The log level can be configured via the LOG_LEVEL environment variable.
 // Supported levels: debug, info, warn, error (default: info).
 func InitLogger() {
-	level := parseLogLevel(getEnv("LOG_LEVEL", "info"))
+	level := parseLogLevel(Env.LogLevel)
 
 	handler := slog.NewJSONHandler(
 		os.Stdout,

@@ -1,9 +1,9 @@
 package routes
 
 import (
-	"github.com/caiolandgraf/go-project-base/internal/app"
-	"github.com/caiolandgraf/go-project-base/internal/controllers"
-	"github.com/caiolandgraf/go-project-base/internal/middleware"
+	"github.com/caiolandgraf/grove-base/internal/app"
+	"github.com/caiolandgraf/grove-base/internal/controllers"
+	"github.com/caiolandgraf/grove-base/internal/middleware"
 	"github.com/go-fuego/fuego"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )

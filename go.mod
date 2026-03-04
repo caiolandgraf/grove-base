@@ -1,4 +1,4 @@
-module github.com/caiolandgraf/go-project-base
+module github.com/caiolandgraf/grove-base
 
 go 1.25.7
 
@@ -6,6 +6,7 @@ require (
 	github.com/alexedwards/scs/redisstore v0.0.0-20251002162104-209de6e426de
 	github.com/alexedwards/scs/v2 v2.9.0
 	github.com/bdpiprava/scalar-go v0.13.0
+	github.com/caarlos0/env/v11 v11.4.0
 	github.com/caiolandgraf/gest v1.1.0
 	github.com/go-fuego/fuego v0.19.0
 	github.com/gomodule/redigo v1.9.3

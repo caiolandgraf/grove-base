@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/caiolandgraf/gest/gest"
-	"github.com/caiolandgraf/go-project-base/internal/models"
+	"github.com/caiolandgraf/grove-base/internal/models"
 )
 
 func init() {

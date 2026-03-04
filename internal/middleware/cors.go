@@ -2,8 +2,9 @@ package middleware
 
 import (
 	"net/http"
-	"os"
 	"strings"
+
+	"github.com/caiolandgraf/grove-base/internal/config"
 )
 
 // CORSConfig contains the CORS configuration
@@ -17,13 +18,8 @@ type CORSConfig struct {
 
 // DefaultCORSConfig returns the default configuration (adjust for production!)
 func DefaultCORSConfig() CORSConfig {
-	origins := os.Getenv("CORS_ALLOWED_ORIGINS")
-	if origins == "" {
-		origins = "http://localhost"
-	}
-
 	return CORSConfig{
-		AllowedOrigins: strings.Split(origins, ","),
+		AllowedOrigins: strings.Split(config.Env.CORSAllowedOrigins, ","),
 		AllowedMethods: []string{
 			"GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH",
 		},

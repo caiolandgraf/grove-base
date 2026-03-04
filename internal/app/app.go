@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/alexedwards/scs/v2"
-	"github.com/caiolandgraf/go-project-base/internal/config"
+	"github.com/caiolandgraf/grove-base/internal/config"
 	"github.com/gomodule/redigo/redis"
 	"gorm.io/gorm"
 )

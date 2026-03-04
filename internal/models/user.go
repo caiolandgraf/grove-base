@@ -3,8 +3,8 @@ package models
 import (
 	"time"
 
-	"github.com/caiolandgraf/go-project-base/internal/app"
-	"github.com/caiolandgraf/go-project-base/internal/database"
+	"github.com/caiolandgraf/grove-base/internal/app"
+	"github.com/caiolandgraf/grove-base/internal/database"
 	"gorm.io/gorm"
 )
 

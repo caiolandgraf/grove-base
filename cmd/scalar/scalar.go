@@ -2,9 +2,9 @@ package scalar
 
 import (
 	"net/http"
-	"os"
 
 	scalargo "github.com/bdpiprava/scalar-go"
+	"github.com/caiolandgraf/grove-base/internal/config"
 )
 
 var customCSS = `
@@ -25,7 +25,7 @@ var customCSS = `
 `
 
 func NewUI(specURL string) http.Handler {
-	baseURL := os.Getenv("BASE_URL")
+	baseURL := config.Env.BaseURL
 	if baseURL == "" {
 		baseURL = "http://localhost:8080"
 	}
@@ -34,14 +34,14 @@ func NewUI(specURL string) http.Handler {
 	html, err := scalargo.NewV2(
 		scalargo.WithSpecURL(fullURL),
 		scalargo.WithMetaDataOpts(
-			scalargo.WithTitle(os.Getenv("APP_NAME")),
+			scalargo.WithTitle(config.Env.AppName),
 			scalargo.WithKeyValue(
 				"description",
-				os.Getenv("APP_DESC"),
+				config.Env.AppDesc,
 			),
 			scalargo.WithKeyValue(
 				"ogDescription",
-				os.Getenv("APP_OGDC"),
+				config.Env.AppOGDC,
 			),
 		),
 		scalargo.WithHideDarkModeToggle(),

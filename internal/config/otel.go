@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
-	"os"
 	"strings"
 	"time"
 
@@ -22,15 +21,8 @@ type OtelShutdown func(ctx context.Context) error
 // InitOtel initializes OpenTelemetry with an OTLP HTTP exporter.
 // Returns a shutdown function that should be called on application exit.
 func InitOtel(ctx context.Context) (OtelShutdown, error) {
-	serviceName := os.Getenv("OTEL_SERVICE_NAME")
-	if serviceName == "" {
-		serviceName = "grove-app"
-	}
-
-	otelEndpoint := os.Getenv("OTEL_EXPLOERER_OTLP_ENDPOINT")
-	if otelEndpoint == "" {
-		otelEndpoint = "localhost:4318"
-	}
+	serviceName := Env.OtelServiceName
+	otelEndpoint := Env.OtelOTLPEndpoint
 
 	// WithEndpoint expects host:port, not a full URL — strip scheme if present
 	otelEndpoint = strings.TrimPrefix(otelEndpoint, "http://")

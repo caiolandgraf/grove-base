@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/caiolandgraf/go-project-base/internal/dto"
-	"github.com/caiolandgraf/go-project-base/internal/models"
+	"github.com/caiolandgraf/grove-base/internal/dto"
+	"github.com/caiolandgraf/grove-base/internal/models"
 	"github.com/go-fuego/fuego"
 	"golang.org/x/crypto/bcrypt"
 )

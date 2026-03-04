@@ -3,7 +3,6 @@ package config
 import (
 	"fmt"
 	"log/slog"
-	"os"
 	"time"
 
 	"github.com/uptrace/opentelemetry-go-extra/otelgorm"
@@ -12,15 +11,6 @@ import (
 	"gorm.io/gorm/logger"
 )
 
-type DatabaseConfig struct {
-	Host     string
-	Port     string
-	User     string
-	Password string
-	DBName   string
-	SSLMode  string
-}
-
 // slogGormWriter adapts slog to GORM's logger.Writer interface.
 type slogGormWriter struct{}
 
@@ -28,28 +18,15 @@ func (w *slogGormWriter) Printf(format string, args ...interface{}) {
 	slog.Info(fmt.Sprintf(format, args...), "component", "gorm")
 }
 
-func LoadDatabaseConfig() *DatabaseConfig {
-	return &DatabaseConfig{
-		Host:     getEnv("DB_HOST", "localhost"),
-		Port:     getEnv("DB_PORT", "5432"),
-		User:     getEnv("DB_USER", "postgres"),
-		Password: getEnv("DB_PASSWORD", "postgres"),
-		DBName:   getEnv("DB_NAME", "grove_db"),
-		SSLMode:  getEnv("DB_SSLMODE", "disable"),
-	}
-}
-
 func InitDatabase() (*gorm.DB, error) {
-	config := LoadDatabaseConfig()
-
 	dsn := fmt.Sprintf(
-		"host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
-		config.Host,
-		config.Port,
-		config.User,
-		config.Password,
-		config.DBName,
-		config.SSLMode,
+		"host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
+		Env.DBHost,
+		Env.DBPort,
+		Env.DBUser,
+		Env.DBPassword,
+		Env.DBName,
+		Env.DBSSLMode,
 	)
 
 	gormLogger := logger.New(
@@ -88,17 +65,10 @@ func InitDatabase() (*gorm.DB, error) {
 	sqlDB.SetConnMaxLifetime(time.Hour)
 
 	slog.Info("Database connected successfully",
-		"host", config.Host,
-		"port", config.Port,
-		"database", config.DBName,
+		"host", Env.DBHost,
+		"port", Env.DBPort,
+		"database", Env.DBName,
 	)
 
 	return db, nil
-}
-
-func getEnv(key, defaultValue string) string {
-	if value := os.Getenv(key); value != "" {
-		return value
-	}
-	return defaultValue
 }

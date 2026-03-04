@@ -7,28 +7,18 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/caiolandgraf/go-project-base/cmd/scalar"
-	"github.com/caiolandgraf/go-project-base/internal/app"
-	"github.com/caiolandgraf/go-project-base/internal/config"
-	"github.com/caiolandgraf/go-project-base/internal/routes"
+	"github.com/caiolandgraf/grove-base/cmd/scalar"
+	"github.com/caiolandgraf/grove-base/internal/app"
+	"github.com/caiolandgraf/grove-base/internal/config"
+	"github.com/caiolandgraf/grove-base/internal/routes"
 	"github.com/go-fuego/fuego"
-	"github.com/joho/godotenv"
 )
 
 func main() {
-	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
-		Level: slog.LevelDebug,
-	}))
+	// Load .env and parse all environment variables into config.Env
+	config.Load()
 
-	slog.SetDefault(logger)
-
-	// Load .env
-	if err := godotenv.Load(); err != nil {
-		slog.Error(".env not found")
-		os.Exit(1)
-	}
-
-	// Initialize structured logger
+	// Initialize structured logger (uses config.Env.LogLevel)
 	config.InitLogger()
 
 	// Initialize OpenTelemetry
