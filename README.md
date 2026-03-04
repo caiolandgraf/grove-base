@@ -40,16 +40,15 @@ The OpenAPI / Swagger UI (Scalar) is available at `http://localhost:8080/swagger
 │       └── main.go              # Entry point
 ├── internal/
 │   ├── app/                     # Shared singletons (DB, Redis, Session, Metrics)
-│   ├── config/                  # Infrastructure initializers (DB, Redis, OTel, etc.)
+│   ├── config/                  # Infrastructure initializers (DB, Redis, OTel, logger, env)
 │   ├── controllers/             # fuego route handlers
 │   ├── database/                # Generic GORM repository
 │   ├── dto/                     # Request and response types
 │   ├── middleware/              # HTTP middlewares (CORS, session, observability)
 │   ├── models/                  # GORM models
 │   ├── routes/                  # Route registration
-│   └── tests/                   # gest spec files
-│       ├── main.go              # gest entrypoint (auto-created by grove make:test)
-│       └── user_spec.go         # Example spec
+│   └── tests/                   # gest test files (*_test.go)
+│       └── user_test.go         # Example test suite
 ├── migrations/                  # Atlas SQL migrations
 ├── infra/                       # Observability stack config (Prometheus, Grafana, Loki, Jaeger)
 ├── .env.example                 # Committed environment template
@@ -66,12 +65,13 @@ The OpenAPI / Swagger UI (Scalar) is available at `http://localhost:8080/swagger
 
 - Go 1.22+
 - [Atlas CLI](https://atlasgo.io/docs/getting-started/installation)
+- [gest CLI](https://github.com/caiolandgraf/gest) — `go install github.com/caiolandgraf/gest/v2/cmd/gest@latest`
 - Docker (for the database and observability stack)
 
 ### Running locally
 
 ```sh
-# 1. Start infrastructure (Postgres, Redis, Jaeger, Grafana, Prometheus, Loki)
+# 1. Start infrastructure (Postgres, Redis)
 docker compose up -d db redis
 
 # 2. Copy and fill in environment variables
@@ -103,11 +103,20 @@ grove make:resource <Name>       # Alias for make:model -r
 ### Testing
 
 ```sh
-grove make:test <Name>   # Scaffold a new gest spec in internal/tests/
-grove test               # Run all specs
-grove test -c            # Run specs + per-suite coverage report
+grove make:test <Name>   # Scaffold a new gest test file in internal/tests/
+grove test               # Run all tests with the gest CLI (beautiful output)
+grove test -c            # Run tests + per-suite coverage report
 grove test -w            # Watch mode — re-run on every save
 grove test -wc           # Watch mode + coverage
+```
+
+Tests are standard `_test.go` files. You can also run them directly with plain Go tooling:
+
+```sh
+go test ./...            # plain go test output
+gest ./...               # beautiful gest output
+gest -w ./...            # watch mode
+gest -c ./...            # coverage table
 ```
 
 ### Server & Build
@@ -152,26 +161,45 @@ grove test -c
 
 ## Testing with gest
 
-Spec files live in `internal/tests/` and self-register via `init()`:
+Test files live anywhere in the project as standard `_test.go` files. Grove scaffolds them into `internal/tests/` by convention.
+
+Each file wraps a gest suite inside a standard `TestXxx` function:
 
 ```go
-// internal/tests/post_spec.go
-package main
+// internal/tests/post_test.go
+package tests
 
-import "github.com/caiolandgraf/gest/gest"
+import (
+    "testing"
 
-func init() {
+    "github.com/caiolandgraf/gest/v2/gest"
+)
+
+func TestPost(t *testing.T) {
     s := gest.Describe("Post")
 
     s.It("should have a valid title", func(t *gest.T) {
         t.Expect("Hello").Not().ToBe("")
     })
 
-    gest.Register(s)
+    s.Run(t)
 }
 ```
 
-> **Note:** gest uses `_spec.go` instead of `_test.go` because the Go toolchain reserves `_test.go` for `go test`. gest runs via `go run`, so any other suffix works.
+Run with the gest CLI for beautiful output:
+
+```sh
+gest ./...           # all tests
+gest -w ./...        # watch mode
+gest -c ./...        # coverage table
+gest -w -c ./...     # watch + coverage
+```
+
+Or with plain `go test` — everything works either way:
+
+```sh
+go test ./...
+```
 
 ---
 
@@ -203,15 +231,19 @@ Copy `.env.example` to `.env` and adjust:
 |----------|---------|-------------|
 | `DB_HOST` | `localhost` | PostgreSQL host |
 | `DB_PORT` | `5432` | PostgreSQL port |
-| `DB_USER` | `grove_user` | Database user |
-| `DB_PASSWORD` | `grove_password` | Database password |
-| `DB_NAME` | `grove_db` | Database name |
+| `DB_USER` | — | Database user *(required)* |
+| `DB_PASSWORD` | — | Database password *(required)* |
+| `DB_NAME` | — | Database name *(required)* |
 | `DB_SSLMODE` | `disable` | SSL mode |
 | `REDIS_HOST` | `localhost` | Redis host |
 | `REDIS_PORT` | `6379` | Redis port |
 | `REDIS_PASSWORD` | _(empty)_ | Redis password |
 | `OTEL_SERVICE_NAME` | `grove-app` | Service name in traces |
 | `OTEL_EXPLOERER_OTLP_ENDPOINT` | `localhost:4318` | OTLP HTTP endpoint |
+| `CORS_ALLOWED_ORIGINS` | `http://localhost` | Comma-separated allowed origins |
+| `BASE_URL` | — | Public base URL *(required)* |
+| `APP_NAME` | `Grove APP` | Application name (shown in Scalar UI) |
+| `APP_DESC` | _(empty)_ | Application description |
 | `LOG_LEVEL` | `info` | Log level (`debug`, `info`, `warn`, `error`) |
 
 ---

@@ -1,11 +1,13 @@
-package main
+package tests
 
 import (
-	"github.com/caiolandgraf/gest/gest"
+	"testing"
+
+	"github.com/caiolandgraf/gest/v2/gest"
 	"github.com/caiolandgraf/grove-base/internal/models"
 )
 
-func init() {
+func TestUser(t *testing.T) {
 	s := gest.Describe("User")
 
 	s.It("should have valid fields", func(t *gest.T) {
@@ -30,5 +32,5 @@ func init() {
 		t.Expect(user.TableName()).ToBe("users")
 	})
 
-	gest.Register(s)
+	s.Run(t)
 }

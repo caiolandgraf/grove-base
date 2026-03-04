@@ -3,6 +3,6 @@ root        = "."
 bin         = ".grove/tmp/app"
 build_cmd   = "go build -o .grove/tmp/app ./cmd/api/"
 watch_dirs  = ["."]
-exclude     = [".grove", "vendor", "node_modules", "internal/tests"]
+exclude     = [".grove", "vendor", "node_modules"]
 extensions  = [".go"]
 debounce_ms = 50
