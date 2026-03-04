@@ -18,7 +18,8 @@ import (
 func main() {
 	// Load .env
 	if err := godotenv.Load(); err != nil {
-		panic(".env not found")
+		slog.Info(".env not found")
+		os.Exit(1)
 	}
 
 	// Initialize structured logger
