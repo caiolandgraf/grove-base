@@ -27,8 +27,6 @@ type HealthCheckDetailedResponse struct {
 
 // SetupRoutes configures all routes using app globals
 func SetupRoutes(s *fuego.Server) {
-	authController := controllers.NewAuthController(app.Session)
-
 	// OpenTelemetry Middleware
 	fuego.Use(s, otelhttp.NewMiddleware("grove-app"))
 
@@ -54,6 +52,7 @@ func SetupRoutes(s *fuego.Server) {
 
 	// ========== AUTH ROUTES (Public) ==========
 	auth := fuego.Group(api, "/auth")
+	authController := controllers.NewAuthController(app.Session)
 	fuego.Post(auth, "/login", authController.Login)
 	fuego.Post(auth, "/register", authController.Register)
 	fuego.Post(auth, "/logout", authController.Logout)
@@ -61,13 +60,13 @@ func SetupRoutes(s *fuego.Server) {
 
 	// ========== USER ROUTES ==========
 	users := fuego.Group(api, "/users")
-	// Auth Middleware if needed for all user routes
-	// fuego.Use(users, middleware.AuthRequired(app.Session))
-	fuego.Get(users, "/", controllers.ListUsers)
-	fuego.Post(users, "/", controllers.CreateUser)
-	fuego.Get(users, "/{user_id}", controllers.GetUser)
-	fuego.Put(users, "/{user_id}", controllers.UpdateUser)
-	fuego.Delete(users, "/{user_id}", controllers.DeleteUser)
+	usersController := controllers.NewUsersController(app.Session)
+	fuego.Use(users, middleware.AuthRequired(app.Session))
+	fuego.Get(users, "/", usersController.ListUsers)
+	fuego.Post(users, "/", usersController.CreateUser)
+	fuego.Get(users, "/{user_id}", usersController.GetUser)
+	fuego.Put(users, "/{user_id}", usersController.UpdateUser)
+	fuego.Delete(users, "/{user_id}", usersController.DeleteUser)
 }
 
 // ──────────────────────────────────────────────

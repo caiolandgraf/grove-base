@@ -124,6 +124,23 @@ func (r *Repository[T]) Create(entity *T) error {
 	return r.db.Create(entity).Error
 }
 
+func (r *Repository[T]) CreateWithTx(
+	tx *gorm.DB,
+	entity *T,
+) error {
+	if entity == nil {
+		var zero T
+		return fmt.Errorf("cannot create: %T entity is nil", zero)
+	}
+
+	db := r.DB()
+	if tx != nil {
+		db = tx
+	}
+
+	return db.Create(entity).Error
+}
+
 // Update saves all fields of the record.
 func (r *Repository[T]) Update(entity *T) error {
 	return r.db.Save(entity).Error

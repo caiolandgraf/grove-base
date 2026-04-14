@@ -20,12 +20,20 @@ type User struct {
 
 func (User) TableName() string { return "users" }
 
-// Users returns a repository scoped to the User model.
-func Users() *database.Repository[User] {
-	return database.New[User](app.DB)
+// recurrentBillRepository is a wrapper around the generic Repository for the recurrentBill model,
+// allowing for custom queries and methods specific to Users.
+type usersRepository struct {
+	*database.Repository[User]
+}
+
+// Users returns a repository scoped to the recurrentBill model.
+func Users() *usersRepository {
+	return &usersRepository{
+		Repository: database.New[User](app.DB),
+	}
 }
 
 // Custom queries
-func FindUserByEmail(email string) (*User, error) {
+func (r *usersRepository) FindUserByEmail(email string) (*User, error) {
 	return Users().FirstBy("email", email)
 }

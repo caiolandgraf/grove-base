@@ -36,7 +36,7 @@ func (ctrl *AuthController) Login(
 		}
 	}
 
-	user, err := models.FindUserByEmail(body.Email)
+	user, err := models.Users().FindUserByEmail(body.Email)
 	if err != nil {
 		return nil, fuego.HTTPError{
 			Status: http.StatusUnauthorized,

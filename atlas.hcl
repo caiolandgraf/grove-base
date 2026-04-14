@@ -12,7 +12,7 @@ data "external_schema" "gorm" {
 
 env "local" {
   src = data.external_schema.gorm.url
-  url = "postgres://grove_user:grove_password@localhost:5432/grove_db?sslmode=disable"
+  url = "postgres://${getenv("DB_USER")}:${getenv("DB_PASSWORD")}@${getenv("DB_HOST")}:${getenv("DB_PORT")}/${getenv("DB_NAME")}?sslmode=${getenv("DB_SSLMODE")}"
 
   dev = "docker://postgres/15/dev"
 
@@ -29,7 +29,7 @@ env "local" {
 
 env "dev" {
   src = data.external_schema.gorm.url
-  url = getenv("DATABASE_URL")
+  url = "postgres://${getenv("DB_USER")}:${getenv("DB_PASSWORD")}@${getenv("DB_HOST")}:${getenv("DB_PORT")}/${getenv("DB_NAME")}?sslmode=${getenv("DB_SSLMODE")}"
 
   dev = "docker://postgres/15/dev"
 
@@ -40,8 +40,7 @@ env "dev" {
 
 env "production" {
   src = data.external_schema.gorm.url
-  url = getenv("DATABASE_URL")
-
+  url = "postgres://${getenv("DB_USER")}:${getenv("DB_PASSWORD")}@${getenv("DB_HOST")}:${getenv("DB_PORT")}/${getenv("DB_NAME")}?sslmode=${getenv("DB_SSLMODE")}"
   migration {
     dir = "file://migrations"
   }

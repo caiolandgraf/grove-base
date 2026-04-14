@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/alexedwards/scs/v2"
 	"github.com/caiolandgraf/grove-base/internal/dto"
 	"github.com/caiolandgraf/grove-base/internal/models"
 	"github.com/go-fuego/fuego"
@@ -13,7 +14,20 @@ import (
 
 var ErrorEmailAlreadyExists = errors.New("email already exists")
 
-func GetUser(c fuego.ContextNoBody) (*dto.UserResponse, error) {
+// AuthController holds only the session manager since DB comes from app.DB.
+type UsersController struct {
+	session *scs.SessionManager
+}
+
+func NewUsersController(
+	session *scs.SessionManager,
+) *UsersController {
+	return &UsersController{session: session}
+}
+
+func (ctrl *UsersController) GetUser(
+	c fuego.ContextNoBody,
+) (*dto.UserResponse, error) {
 	userID := c.PathParam("user_id")
 
 	user, err := models.Users().Find(userID)
@@ -28,7 +42,9 @@ func GetUser(c fuego.ContextNoBody) (*dto.UserResponse, error) {
 	return toUserDTO(user), nil
 }
 
-func ListUsers(c fuego.ContextNoBody) (*dto.UsersListResponse, error) {
+func (ctrl *UsersController) ListUsers(
+	c fuego.ContextNoBody,
+) (*dto.UsersListResponse, error) {
 	page, _ := strconv.Atoi(c.QueryParam("page"))
 	size, _ := strconv.Atoi(c.QueryParam("size"))
 
@@ -58,7 +74,7 @@ func ListUsers(c fuego.ContextNoBody) (*dto.UsersListResponse, error) {
 	}, nil
 }
 
-func CreateUser(
+func (ctrl *UsersController) CreateUser(
 	c fuego.ContextWithBody[dto.CreateUserRequest],
 ) (*dto.UserResponse, error) {
 	if err := fuego.ValidateParams(c); err != nil {
@@ -115,7 +131,7 @@ func CreateUser(
 	return toUserDTO(user), nil
 }
 
-func UpdateUser(
+func (ctrl *UsersController) UpdateUser(
 	c fuego.ContextWithBody[dto.UpdateUserRequest],
 ) (*dto.UserResponse, error) {
 	userID := c.PathParam("user_id")
@@ -155,7 +171,9 @@ func UpdateUser(
 	return toUserDTO(user), nil
 }
 
-func DeleteUser(c fuego.ContextNoBody) (map[string]string, error) {
+func (ctrl *UsersController) DeleteUser(
+	c fuego.ContextNoBody,
+) (map[string]string, error) {
 	userID := c.PathParam("user_id")
 
 	if err := models.Users().Delete(userID); err != nil {
