@@ -58,15 +58,15 @@ func SetupRoutes(s *fuego.Server) {
 	fuego.Post(auth, "/logout", authController.Logout)
 	fuego.Get(auth, "/me", authController.Me)
 
-	// ========== USER ROUTES ==========
+	// ========== USERS ROUTES ==========
 	users := fuego.Group(api, "/users")
-	usersController := controllers.NewUsersController(app.Session)
+	userController := controllers.NewUserController(app.Session)
 	fuego.Use(users, middleware.AuthRequired(app.Session))
-	fuego.Get(users, "/", usersController.ListUsers)
-	fuego.Post(users, "/", usersController.CreateUser)
-	fuego.Get(users, "/{user_id}", usersController.GetUser)
-	fuego.Put(users, "/{user_id}", usersController.UpdateUser)
-	fuego.Delete(users, "/{user_id}", usersController.DeleteUser)
+	fuego.Get(users, "/", userController.ListUsers)
+	fuego.Post(users, "/", userController.CreateUser)
+	fuego.Get(users, "/{user_id}", userController.GetUser)
+	fuego.Put(users, "/{user_id}", userController.UpdateUser)
+	fuego.Delete(users, "/{user_id}", userController.DeleteUser)
 }
 
 // ──────────────────────────────────────────────

@@ -14,18 +14,18 @@ import (
 
 var ErrorEmailAlreadyExists = errors.New("email already exists")
 
-// AuthController holds only the session manager since DB comes from app.DB.
-type UsersController struct {
+// UserController holds only the session manager since DB comes from app.DB.
+type UserController struct {
 	session *scs.SessionManager
 }
 
-func NewUsersController(
+func NewUserController(
 	session *scs.SessionManager,
-) *UsersController {
-	return &UsersController{session: session}
+) *UserController {
+	return &UserController{session: session}
 }
 
-func (ctrl *UsersController) GetUser(
+func (ctrl *UserController) GetUser(
 	c fuego.ContextNoBody,
 ) (*dto.UserResponse, error) {
 	userID := c.PathParam("user_id")
@@ -42,7 +42,7 @@ func (ctrl *UsersController) GetUser(
 	return toUserDTO(user), nil
 }
 
-func (ctrl *UsersController) ListUsers(
+func (ctrl *UserController) ListUsers(
 	c fuego.ContextNoBody,
 ) (*dto.UsersListResponse, error) {
 	page, _ := strconv.Atoi(c.QueryParam("page"))
@@ -74,7 +74,7 @@ func (ctrl *UsersController) ListUsers(
 	}, nil
 }
 
-func (ctrl *UsersController) CreateUser(
+func (ctrl *UserController) CreateUser(
 	c fuego.ContextWithBody[dto.CreateUserRequest],
 ) (*dto.UserResponse, error) {
 	if err := fuego.ValidateParams(c); err != nil {
@@ -131,7 +131,7 @@ func (ctrl *UsersController) CreateUser(
 	return toUserDTO(user), nil
 }
 
-func (ctrl *UsersController) UpdateUser(
+func (ctrl *UserController) UpdateUser(
 	c fuego.ContextWithBody[dto.UpdateUserRequest],
 ) (*dto.UserResponse, error) {
 	userID := c.PathParam("user_id")
@@ -171,7 +171,7 @@ func (ctrl *UsersController) UpdateUser(
 	return toUserDTO(user), nil
 }
 
-func (ctrl *UsersController) DeleteUser(
+func (ctrl *UserController) DeleteUser(
 	c fuego.ContextNoBody,
 ) (map[string]string, error) {
 	userID := c.PathParam("user_id")
