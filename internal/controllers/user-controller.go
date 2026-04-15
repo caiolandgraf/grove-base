@@ -25,7 +25,7 @@ func NewUserController(
 	return &UserController{session: session}
 }
 
-func (ctrl *UserController) Get(
+func (ctl *UserController) Get(
 	c fuego.ContextNoBody,
 ) (*dto.UserResponse, error) {
 	userID := c.PathParam("user_id")
@@ -42,7 +42,7 @@ func (ctrl *UserController) Get(
 	return toUserDTO(user), nil
 }
 
-func (ctrl *UserController) List(
+func (ctl *UserController) List(
 	c fuego.ContextNoBody,
 ) (*dto.UsersListResponse, error) {
 	page, _ := strconv.Atoi(c.QueryParam("page"))
@@ -74,7 +74,7 @@ func (ctrl *UserController) List(
 	}, nil
 }
 
-func (ctrl *UserController) Create(
+func (ctl *UserController) Create(
 	c fuego.ContextWithBody[dto.CreateUserRequest],
 ) (*dto.UserResponse, error) {
 	if err := fuego.ValidateParams(c); err != nil {
@@ -131,7 +131,7 @@ func (ctrl *UserController) Create(
 	return toUserDTO(user), nil
 }
 
-func (ctrl *UserController) Update(
+func (ctl *UserController) Update(
 	c fuego.ContextWithBody[dto.UpdateUserRequest],
 ) (*dto.UserResponse, error) {
 	userID := c.PathParam("user_id")
@@ -171,7 +171,7 @@ func (ctrl *UserController) Update(
 	return toUserDTO(user), nil
 }
 
-func (ctrl *UserController) Delete(
+func (ctl *UserController) Delete(
 	c fuego.ContextNoBody,
 ) (map[string]string, error) {
 	userID := c.PathParam("user_id")

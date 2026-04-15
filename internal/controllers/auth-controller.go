@@ -25,7 +25,7 @@ func NewAuthController(session *scs.SessionManager) *AuthController {
 }
 
 // Login authenticates the user and creates a session.
-func (ctrl *AuthController) Login(
+func (ctl *AuthController) Login(
 	c fuego.ContextWithBody[dto.LoginRequest],
 ) (*dto.LoginResponse, error) {
 	body, err := c.Body()
@@ -56,9 +56,9 @@ func (ctrl *AuthController) Login(
 
 	// Create session
 	ctx := c.Context()
-	ctrl.session.Put(ctx, "user_id", user.ID)
-	ctrl.session.Put(ctx, "user_email", user.Email)
-	ctrl.session.Put(ctx, "user_name", user.Name)
+	ctl.session.Put(ctx, "user_id", user.ID)
+	ctl.session.Put(ctx, "user_email", user.Email)
+	ctl.session.Put(ctx, "user_name", user.Name)
 
 	return &dto.LoginResponse{
 		User:    *toUserDTO(user),
@@ -67,7 +67,7 @@ func (ctrl *AuthController) Login(
 }
 
 // Register creates a new user and logs in automatically.
-func (ctrl *AuthController) Register(
+func (ctl *AuthController) Register(
 	c fuego.ContextWithBody[dto.RegisterRequest],
 ) (*dto.LoginResponse, error) {
 	body, err := c.Body()
@@ -115,9 +115,9 @@ func (ctrl *AuthController) Register(
 
 	// Auto-login after registration
 	ctx := c.Context()
-	ctrl.session.Put(ctx, "user_id", user.ID)
-	ctrl.session.Put(ctx, "user_email", user.Email)
-	ctrl.session.Put(ctx, "user_name", user.Name)
+	ctl.session.Put(ctx, "user_id", user.ID)
+	ctl.session.Put(ctx, "user_email", user.Email)
+	ctl.session.Put(ctx, "user_name", user.Name)
 
 	return &dto.LoginResponse{
 		User:    *toUserDTO(user),
@@ -126,10 +126,10 @@ func (ctrl *AuthController) Register(
 }
 
 // Logout destroys the session.
-func (ctrl *AuthController) Logout(
+func (ctl *AuthController) Logout(
 	c fuego.ContextNoBody,
 ) (*dto.LogoutResponse, error) {
-	if err := ctrl.session.Destroy(c.Context()); err != nil {
+	if err := ctl.session.Destroy(c.Context()); err != nil {
 		return nil, fuego.HTTPError{
 			Status: http.StatusInternalServerError,
 			Err:    err,
@@ -142,11 +142,11 @@ func (ctrl *AuthController) Logout(
 }
 
 // Me returns the logged-in user's data from the session.
-func (ctrl *AuthController) Me(
+func (ctl *AuthController) Me(
 	c fuego.ContextNoBody,
 ) (*dto.SessionResponse, error) {
 	ctx := c.Context()
-	userID := ctrl.session.GetString(ctx, "user_id")
+	userID := ctl.session.GetString(ctx, "user_id")
 
 	if userID == "" {
 		return &dto.SessionResponse{
