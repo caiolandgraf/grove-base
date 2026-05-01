@@ -238,8 +238,11 @@ Copy `.env.example` to `.env` and adjust:
 | `REDIS_HOST` | `localhost` | Redis host |
 | `REDIS_PORT` | `6379` | Redis port |
 | `REDIS_PASSWORD` | _(empty)_ | Redis password |
+| `OTEL_ENABLED` | `true` | Enable OpenTelemetry tracing |
 | `OTEL_SERVICE_NAME` | `grove-app` | Service name in traces |
 | `OTEL_EXPLOERER_OTLP_ENDPOINT` | `localhost:4318` | OTLP HTTP endpoint |
+| `OTEL_TRACE_SAMPLE_RATIO` | `1.0` | Trace sampling ratio (0.0–1.0) |
+| `METRICS_ENABLED` | `true` | Enable Prometheus metrics |
 | `CORS_ALLOWED_ORIGINS` | `http://localhost` | Comma-separated allowed origins |
 | `BASE_URL` | — | Public base URL *(required)* |
 | `APP_NAME` | `Grove APP` | Application name (shown in Scalar UI) |

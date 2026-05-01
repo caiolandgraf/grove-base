@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/alexedwards/scs/v2"
-	"github.com/caiolandgraf/grove-base/internal/config"
+	"github.com/caiolandgraf/grove-base/internal/app/config"
 	"github.com/gomodule/redigo/redis"
 	"gorm.io/gorm"
 )
@@ -45,11 +45,15 @@ func Boot() error {
 	Session = config.InitSessionManager(redisPool)
 
 	// Metrics
-	metricsHandler, err := config.InitMetrics()
-	if err != nil {
-		return err
+	if config.Env.MetricsEnabled {
+		metricsHandler, err := config.InitMetrics()
+		if err != nil {
+			return err
+		}
+		Metrics = metricsHandler
+	} else {
+		slog.Info("Prometheus metrics disabled")
 	}
-	Metrics = metricsHandler
 
 	slog.Info("Application booted successfully")
 	return nil

@@ -21,8 +21,21 @@ type OtelShutdown func(ctx context.Context) error
 // InitOtel initializes OpenTelemetry with an OTLP HTTP exporter.
 // Returns a shutdown function that should be called on application exit.
 func InitOtel(ctx context.Context) (OtelShutdown, error) {
+	if !Env.OtelEnabled {
+		slog.Info("OpenTelemetry tracing disabled")
+		return func(ctx context.Context) error { return nil }, nil
+	}
+
 	serviceName := Env.OtelServiceName
 	otelEndpoint := Env.OtelOTLPEndpoint
+
+	sampleRatio := Env.OtelTraceSampleRatio
+	if sampleRatio < 0 {
+		sampleRatio = 0
+	}
+	if sampleRatio > 1 {
+		sampleRatio = 1
+	}
 
 	// WithEndpoint expects host:port, not a full URL — strip scheme if present
 	otelEndpoint = strings.TrimPrefix(otelEndpoint, "http://")
@@ -51,10 +64,12 @@ func InitOtel(ctx context.Context) (OtelShutdown, error) {
 	}
 
 	// Tracer provider
+	sampler := sdktrace.ParentBased(sdktrace.TraceIDRatioBased(sampleRatio))
+
 	tp := sdktrace.NewTracerProvider(
 		sdktrace.WithBatcher(exporter),
 		sdktrace.WithResource(res),
-		sdktrace.WithSampler(sdktrace.AlwaysSample()),
+		sdktrace.WithSampler(sampler),
 	)
 
 	// Register as global TracerProvider so otelhttp and otelgorm pick it up
@@ -69,6 +84,7 @@ func InitOtel(ctx context.Context) (OtelShutdown, error) {
 	slog.Info("OpenTelemetry initialized",
 		"service", serviceName,
 		"endpoint", otelEndpoint,
+		"sample_ratio", sampleRatio,
 	)
 
 	// Return shutdown function

@@ -24,9 +24,12 @@ type Config struct {
 	RedisPort     int    `env:"REDIS_PORT" envDefault:"6379"`
 	RedisPassword string `env:"REDIS_PASSWORD"`
 
-	// OpenTelemetry
-	OtelServiceName  string `env:"OTEL_SERVICE_NAME"             envDefault:"grove-app"`
-	OtelOTLPEndpoint string `env:"OTEL_EXPLOERER_OTLP_ENDPOINT"  envDefault:"localhost:4318"`
+	// Observability
+	OtelEnabled          bool    `env:"OTEL_ENABLED"                   envDefault:"true"`
+	OtelServiceName      string  `env:"OTEL_SERVICE_NAME"             envDefault:"grove-app"`
+	OtelOTLPEndpoint     string  `env:"OTEL_EXPLOERER_OTLP_ENDPOINT"  envDefault:"localhost:4318"`
+	OtelTraceSampleRatio float64 `env:"OTEL_TRACE_SAMPLE_RATIO"       envDefault:"1.0"`
+	MetricsEnabled       bool    `env:"METRICS_ENABLED"                envDefault:"true"`
 
 	// CORS
 	CORSAllowedOrigins string `env:"CORS_ALLOWED_ORIGINS" envDefault:"http://localhost"`

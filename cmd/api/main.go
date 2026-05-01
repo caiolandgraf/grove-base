@@ -9,7 +9,7 @@ import (
 
 	"github.com/caiolandgraf/grove-base/cmd/scalar"
 	"github.com/caiolandgraf/grove-base/internal/app"
-	"github.com/caiolandgraf/grove-base/internal/config"
+	"github.com/caiolandgraf/grove-base/internal/app/config"
 	"github.com/caiolandgraf/grove-base/internal/routes"
 	"github.com/go-fuego/fuego"
 )
@@ -42,7 +42,9 @@ func main() {
 		fuego.WithAddr("localhost:8080"),
 		fuego.WithEngineOptions(
 			fuego.WithOpenAPIConfig(fuego.OpenAPIConfig{
-				UIHandler: scalar.NewUI,
+				JSONFilePath: "./internal/app/docs/openapi.json",
+				SwaggerURL:   "/api-doc",
+				UIHandler:    scalar.NewUI,
 			}),
 		),
 	)

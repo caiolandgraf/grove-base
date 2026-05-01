@@ -2,8 +2,9 @@ package routes
 
 import (
 	"github.com/caiolandgraf/grove-base/internal/app"
+	"github.com/caiolandgraf/grove-base/internal/app/config"
+	"github.com/caiolandgraf/grove-base/internal/app/middleware"
 	"github.com/caiolandgraf/grove-base/internal/controllers"
-	"github.com/caiolandgraf/grove-base/internal/middleware"
 	"github.com/go-fuego/fuego"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
@@ -27,12 +28,14 @@ type HealthCheckDetailedResponse struct {
 
 // SetupRoutes configures all routes using app globals
 func SetupRoutes(s *fuego.Server) {
-	// OpenTelemetry Middleware
-	fuego.Use(s, otelhttp.NewMiddleware("grove-app"))
+	// OpenTelemetry / Metrics Middleware
+	if config.Env.OtelEnabled || config.Env.MetricsEnabled {
+		fuego.Use(s, otelhttp.NewMiddleware(config.Env.OtelServiceName))
 
-	// Route tag middleware — reads r.Pattern (Go 1.22+) and sets http.route
-	// on the otelhttp labeler (Prometheus metrics) and span (Jaeger traces).
-	fuego.Use(s, middleware.RouteTagMiddleware)
+		// Route tag middleware — reads r.Pattern (Go 1.22+) and sets http.route
+		// on the otelhttp labeler (Prometheus metrics) and span (Jaeger traces).
+		fuego.Use(s, middleware.RouteTagMiddleware)
+	}
 
 	// CORS Middleware global
 	fuego.Use(s, middleware.CORSMiddleware(middleware.DefaultCORSConfig()))
@@ -45,7 +48,9 @@ func SetupRoutes(s *fuego.Server) {
 	fuego.Get(s, "/health", healthCheckDetailed)
 
 	// Prometheus metrics endpoint
-	fuego.GetStd(s, "/metrics", app.Metrics.ServeHTTP)
+	if app.Metrics != nil {
+		fuego.GetStd(s, "/metrics", app.Metrics.ServeHTTP)
+	}
 
 	// API v1
 	api := fuego.Group(s, "/api/v1")

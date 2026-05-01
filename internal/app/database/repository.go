@@ -29,6 +29,36 @@ func New[T any](db *gorm.DB) *Repository[T] {
 // Single record queries
 // ──────────────────────────────────────────────
 
+// Where returns a build with a condition applied, without executing the query yet
+func (r *Repository[T]) Where(pointer string, arg any) *Repository[T] {
+	query := fmt.Sprintf("%s = ?", pointer)
+
+	return &Repository[T]{
+		db: r.db.Where(query, arg),
+	}
+}
+
+// Get executes the queries and return all results
+func (r *Repository[T]) Get() (*T, error) {
+	var entity T
+	if err := r.db.First(&entity).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, fmt.Errorf("%T not found", entity)
+		}
+		return nil, err
+	}
+	return &entity, nil
+}
+
+// GetAll executes a query and return all results
+func (r *Repository[T]) GetAll() ([]T, error) {
+	var entities []T
+	if err := r.db.Find(&entities).Error; err != nil {
+		return nil, err
+	}
+	return entities, nil
+}
+
 // Find retrieves a record by its primary key.
 func (r *Repository[T]) Find(id any) (*T, error) {
 	var entity T
@@ -71,15 +101,6 @@ func (r *Repository[T]) FirstBy(field string, value any) (*T, error) {
 func (r *Repository[T]) All() ([]T, error) {
 	var entities []T
 	if err := r.db.Find(&entities).Error; err != nil {
-		return nil, err
-	}
-	return entities, nil
-}
-
-// Where returns records matching the condition.
-func (r *Repository[T]) Where(query string, args ...any) ([]T, error) {
-	var entities []T
-	if err := r.db.Where(query, args...).Find(&entities).Error; err != nil {
 		return nil, err
 	}
 	return entities, nil
@@ -201,4 +222,11 @@ func (r *Repository[T]) Query() *gorm.DB {
 // DB returns the raw *gorm.DB without model scoping.
 func (r *Repository[T]) DB() *gorm.DB {
 	return r.db
+}
+
+func (r *Repository[T]) With(relations ...string) *Repository[T] {
+	for _, relation := range relations {
+		r.db = r.db.Preload(relation)
+	}
+	return r
 }

@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	scalargo "github.com/bdpiprava/scalar-go"
-	"github.com/caiolandgraf/grove-base/internal/config"
+	"github.com/caiolandgraf/grove-base/internal/app/config"
 )
 
 var customCSS = `

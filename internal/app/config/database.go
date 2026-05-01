@@ -50,8 +50,10 @@ func InitDatabase() (*gorm.DB, error) {
 	}
 
 	// OTel tracing para todas as queries
-	if err := db.Use(otelgorm.NewPlugin()); err != nil {
-		return nil, fmt.Errorf("failed to setup OTel GORM plugin: %w", err)
+	if Env.OtelEnabled {
+		if err := db.Use(otelgorm.NewPlugin()); err != nil {
+			return nil, fmt.Errorf("failed to setup OTel GORM plugin: %w", err)
+		}
 	}
 
 	sqlDB, err := db.DB()

@@ -2,7 +2,7 @@
 root        = "."
 bin         = ".grove/tmp/app"
 build_cmd   = "go build -o .grove/tmp/app ./cmd/api/"
-watch_dirs  = ["."]
-exclude     = [".grove", "vendor", "node_modules"]
+watch_dirs  = ["cmd", "internal"]
+exclude     = [".grove", "vendor", "node_modules", ".git", "infra", "migrations", "bin", "internal/tests"]
 extensions  = [".go"]
 debounce_ms = 50

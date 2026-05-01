@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/caiolandgraf/grove-base/internal/config"
+	"github.com/caiolandgraf/grove-base/internal/app/config"
 )
 
 // CORSConfig contains the CORS configuration

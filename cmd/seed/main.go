@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"github.com/caiolandgraf/grove-base/internal/app"
-	"github.com/caiolandgraf/grove-base/internal/database/seeders"
+	"github.com/caiolandgraf/grove-base/internal/app/database/seeders"
 )
 
 func main() {
