@@ -1,4 +1,4 @@
-package dto
+package types
 
 // HealthCheckResponse is the health check response
 type HealthCheckResponse struct {

@@ -1,26 +1,42 @@
-package controllers
+package users
 
 import (
 	"errors"
 	"net/http"
 	"strconv"
 
-	"github.com/caiolandgraf/go-project-base/internal/dto"
-	"github.com/caiolandgraf/go-project-base/internal/services"
+	"github.com/alexedwards/scs/v2"
+	"github.com/caiolandgraf/go-project-base/internal/app/types"
+	"github.com/caiolandgraf/go-project-base/internal/app/router"
 	"github.com/go-fuego/fuego"
+	"gorm.io/gorm"
 )
 
-type UserController struct {
-	service services.UserService
+type Controller struct {
+	service Service
 }
 
-func NewUserController(service services.UserService) *UserController {
-	return &UserController{service: service}
+func NewController(service Service) *Controller {
+	return &Controller{service: service}
 }
 
-func (ctrl *UserController) GetUser(
+func Wire(db *gorm.DB) *Controller {
+	return NewController(WireService(db))
+}
+
+func (ctrl *Controller) Mount(api *fuego.Server, session *scs.SessionManager) {
+	group := fuego.Group(api, "/users")
+
+	router.Get(group, "/", ctrl.ListUsers, ListUsersDoc, session)
+	router.Post(group, "/", ctrl.CreateUser, CreateUserDoc, session)
+	router.Get(group, "/{user_id}", ctrl.GetUser, GetUserDoc, session)
+	router.Put(group, "/{user_id}", ctrl.UpdateUser, UpdateUserDoc, session)
+	router.Delete(group, "/{user_id}", ctrl.DeleteUser, DeleteUserDoc, session)
+}
+
+func (ctrl *Controller) GetUser(
 	c fuego.ContextNoBody,
-) (*dto.UserResponse, error) {
+) (*UserResponse, error) {
 	userID := c.PathParam("user_id")
 
 	user, err := ctrl.service.GetUserByID(userID)
@@ -34,9 +50,9 @@ func (ctrl *UserController) GetUser(
 	return user, nil
 }
 
-func (ctrl *UserController) ListUsers(
+func (ctrl *Controller) ListUsers(
 	c fuego.ContextNoBody,
-) (*dto.UsersListResponse, error) {
+) (*UsersListResponse, error) {
 	page, _ := strconv.Atoi(c.QueryParam("page"))
 	size, _ := strconv.Atoi(c.QueryParam("size"))
 
@@ -58,9 +74,9 @@ func (ctrl *UserController) ListUsers(
 	return users, nil
 }
 
-func (ctrl *UserController) CreateUser(
-	c fuego.ContextWithBody[dto.CreateUserRequest],
-) (*dto.UserResponse, error) {
+func (ctrl *Controller) CreateUser(
+	c fuego.ContextWithBody[CreateUserRequest],
+) (*UserResponse, error) {
 	body, err := c.Body()
 	if err != nil {
 		return nil, fuego.HTTPError{
@@ -71,7 +87,7 @@ func (ctrl *UserController) CreateUser(
 
 	user, err := ctrl.service.CreateUser(&body)
 	if err != nil {
-		if errors.Is(err, services.ErrorEmailAlreadyExists) {
+		if errors.Is(err, ErrEmailAlreadyExists) {
 			return nil, fuego.HTTPError{
 				Status: http.StatusConflict,
 				Err:    err,
@@ -88,9 +104,9 @@ func (ctrl *UserController) CreateUser(
 	return user, nil
 }
 
-func (ctrl *UserController) UpdateUser(
-	c fuego.ContextWithBody[dto.UpdateUserRequest],
-) (*dto.UserResponse, error) {
+func (ctrl *Controller) UpdateUser(
+	c fuego.ContextWithBody[UpdateUserRequest],
+) (*UserResponse, error) {
 	userID := c.PathParam("user_id")
 	body, err := c.Body()
 	if err != nil {
@@ -111,9 +127,9 @@ func (ctrl *UserController) UpdateUser(
 	return user, nil
 }
 
-func (ctrl *UserController) DeleteUser(
+func (ctrl *Controller) DeleteUser(
 	c fuego.ContextNoBody,
-) (map[string]string, error) {
+) (*types.MessageResponse, error) {
 	userID := c.PathParam("user_id")
 
 	err := ctrl.service.DeleteUser(userID)
@@ -124,5 +140,5 @@ func (ctrl *UserController) DeleteUser(
 		}
 	}
 
-	return map[string]string{"message": "User deleted successfully"}, nil
+	return &types.MessageResponse{Message: "User deleted successfully"}, nil
 }

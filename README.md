@@ -70,42 +70,44 @@ go-project-base/
 ├── cmd/
 │   ├── api/
 │   │   └── main.go                # Application entrypoint
+│   ├── atlas/
+│   │   └── main.go                # Atlas GORM schema loader
 │   └── scalar/
 │       └── scalar.go              # Scalar API docs UI handler
 ├── internal/
-│   ├── config/
-│   │   ├── database.go            # PostgreSQL + GORM setup
-│   │   ├── logger.go              # slog JSON logger (stdout + file)
-│   │   ├── metrics.go             # Prometheus metrics via OTel exporter
-│   │   ├── otel.go                # OpenTelemetry tracing setup
-│   │   ├── redis.go               # Redis connection pool
-│   │   └── session.go             # SCS session manager
-│   ├── container/
-│   │   └── container.go           # Dependency injection container
-│   ├── controllers/
-│   │   ├── auth-controller.go     # Auth endpoints (login, register, logout)
-│   │   └── users-controller.go    # User CRUD endpoints
-│   ├── dto/
-│   │   ├── auth-dto.go            # Auth request/response types
-│   │   ├── common-dto.go          # Shared types
-│   │   ├── health-dto.go          # Health check types
-│   │   └── user-dto.go            # User request/response types
-│   ├── helpers/
-│   │   ├── jsonutils/             # JSON utilities
-│   │   └── validator/             # Request validation
-│   ├── middlewares/
-│   │   ├── cors.go                # CORS middleware
-│   │   └── session.go             # Session middleware
-│   ├── models/
-│   │   └── user.go                # GORM User model
-│   ├── repositories/
-│   │   └── user-repository.go     # User data access layer
-│   ├── routes/
-│   │   ├── health.go              # Health check routes
-│   │   └── routes.go              # Route registration
-│   └── services/
-│       ├── auth-service.go        # Auth business logic
-│       └── user-service.go        # User business logic
+│   ├── app/                       # Shared infrastructure (config, DB, helpers, middleware, types)
+│   │   ├── config/
+│   │   │   ├── database.go        # PostgreSQL + GORM setup
+│   │   │   ├── logger.go          # slog JSON logger (stdout + file)
+│   │   │   ├── metrics.go         # Prometheus metrics via OTel exporter
+│   │   │   ├── otel.go            # OpenTelemetry tracing setup
+│   │   │   ├── redis.go           # Redis connection pool
+│   │   │   └── session.go         # SCS session manager
+│   │   ├── database/
+│   │   │   ├── repository.go      # Generic Repository[T] (Eloquent-like base)
+│   │   │   └── registry.go        # Atlas migration registry (auto via model init())
+│   │   ├── helpers/
+│   │   │   ├── jsonutils/         # JSON utilities
+│   │   │   └── validator/         # Request validation
+│   │   ├── middleware/
+│   │   │   ├── cors.go            # CORS middleware
+│   │   │   └── session.go         # Session middleware
+│   │   ├── types/
+│   │   │   ├── common-dto.go      # Shared HTTP types (errors, messages)
+│   │   │   └── health-dto.go      # Health check types
+│   │   ├── router/
+│   │   │   ├── doc.go             # Declarative OpenAPI route documentation
+│   │   │   ├── options.go         # Doc → Fuego options
+│   │   │   └── register.go        # router.Get/Post/Put/Delete wrappers
+│   │   └── app.go                 # Package doc
+│   ├── modules/
+│   │   ├── auth/                  # Auth domain (dto, service, controller, docs)
+│   │   ├── users/                 # Users domain (model+repo, dto, service, controller, docs)
+│   │   ├── module.go              # Module interface + Boot
+│   │   └── register.go            # Module registry
+│   └── routes/
+│       ├── health.go              # Health check routes
+│       └── routes.go              # Global routes + module mounting
 ├── infra/
 │   ├── grafana/
 │   │   ├── dashboards/
@@ -132,21 +134,21 @@ go-project-base/
 
 ### Architecture
 
-The project follows a **layered architecture** with clear separation of concerns:
+The project follows a **modular MSC architecture** — each domain is self-contained:
 
 ```
-Request → Routes → Middlewares → Controllers → Services → Repositories → Database
+Request → Routes → Middlewares → Module (Controller → Service → Repository) → Database
 ```
 
 | Layer            | Responsibility                                              |
 | ---------------- | ----------------------------------------------------------- |
-| **Routes**       | Maps HTTP endpoints to controller handlers                  |
-| **Middlewares**  | Cross-cutting concerns (CORS, sessions, auth)               |
-| **Controllers**  | Parses requests, validates input, returns responses         |
-| **Services**     | Business logic and orchestration                            |
-| **Repositories** | Data access abstraction over GORM                           |
-| **Models**       | GORM entity definitions (also used by Atlas for migrations) |
-| **Container**    | Wires all dependencies together (poor man's DI)             |
+| **Routes**       | Global middleware, health, mounts all modules               |
+| **Modules**      | Per-domain package: model+repo, dto, service, controller, docs |
+| **Router**       | Declarative OpenAPI documentation per endpoint              |
+| **App/database** | Generic `Repository[T]` base (Eloquent-like) embedded per module |
+| **App/types**    | Shared HTTP response types (errors, health, messages)       |
+
+Each module wires itself (`New` + `Wire`) and registers routes via `Mount`. Add new domains in `internal/modules/register.go`. Models auto-register for Atlas via `init()` in each module's `model.go`.
 
 ---
 
@@ -276,19 +278,20 @@ make db-reset         # Drop and recreate database, then migrate
 
 ## Migrations with Atlas
 
-This project uses [Atlas](https://atlasgo.io/) with a **GORM provider** — your GORM models in `internal/models/` are the single source of truth for the database schema.
+This project uses [Atlas](https://atlasgo.io/) in **Program Mode** — models self-register via `init()` and `cmd/atlas` loads all modules automatically.
 
 ### Create a new migration
 
-1. Add or modify a model in `internal/models/`
-2. Generate the migration:
+1. Add or modify a model in `internal/modules/<domain>/model.go` (with `models.Register(&YourModel{})` in `init()`)
+2. Register the module in `internal/modules/register.go` (HTTP mount — model registration happens via import)
+3. Generate the migration:
 
 ```
 make migrate-create name=describe_your_change
 ```
 
-3. Review the generated SQL in `migrations/`
-4. Apply it:
+4. Review the generated SQL in `migrations/`
+5. Apply it:
 
 ```
 make migrate-up
@@ -426,11 +429,13 @@ Grafana comes with a **pre-provisioned dashboard** (`Go Project Base`) that incl
 
 ## Project Conventions
 
-- **File naming**: kebab-case (`user-controller.go`, `auth-dto.go`)
-- **Package naming**: lowercase, single word (`controllers`, `services`)
+- **Modules**: One package per domain under `internal/modules/` (model+repo, dto, service, controller, docs)
+- **Shared infra**: Config, database, helpers, middleware, router, and types live under `internal/app/`
+- **Wiring**: `New` (testable, accepts interfaces) + `Wire` (production, accepts `*gorm.DB`) per layer
+- **Routes**: Document each endpoint in `docs.go` using `router.Doc`; register module in `modules/register.go`
+- **Migrations**: Model self-registers in `init()`; Atlas loads all modules via `cmd/atlas`
 - **Error handling**: Errors are wrapped with `fmt.Errorf("context: %w", err)` and propagated up
 - **Configuration**: Environment variables with sensible defaults via `getEnv(key, default)`
-- **Models**: GORM models are the single source of truth; Atlas generates migrations from them
 - **Logging**: Always use `slog` with structured key-value pairs — never `fmt.Println` or `log.Println`
 - **Observability**: All infrastructure configs live in `infra/`; Grafana is pre-provisioned on `docker compose up`
 

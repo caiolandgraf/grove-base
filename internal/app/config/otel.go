@@ -42,7 +42,7 @@ func InitOtel(ctx context.Context) (OtelShutdown, error) {
 		resource.NewWithAttributes(
 			semconv.SchemaURL,
 			semconv.ServiceName(serviceName),
-			semconv.ServiceVersion("1.0.0"),
+			semconv.ServiceVersion("2.0.0"),
 		),
 	)
 	if err != nil {

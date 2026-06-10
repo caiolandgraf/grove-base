@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/caiolandgraf/go-project-base/internal/helpers/validator"
+	"github.com/caiolandgraf/go-project-base/internal/app/helpers/validator"
 )
 
 func EncodeJson[T any](

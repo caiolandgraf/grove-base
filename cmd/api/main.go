@@ -8,24 +8,22 @@ import (
 	"syscall"
 
 	"github.com/caiolandgraf/go-project-base/cmd/scalar"
-	"github.com/caiolandgraf/go-project-base/internal/config"
-	"github.com/caiolandgraf/go-project-base/internal/container"
+	"github.com/caiolandgraf/go-project-base/internal/app/config"
 	"github.com/caiolandgraf/go-project-base/internal/routes"
 	"github.com/go-fuego/fuego"
+	"github.com/gomodule/redigo/redis"
 	"github.com/joho/godotenv"
+	"gorm.io/gorm"
 )
 
 func main() {
-	// Load .env
 	err := godotenv.Load()
 	if err != nil {
 		panic(".env not found")
 	}
 
-	// Initialize structured logger
 	config.InitLogger()
 
-	// Initialize OpenTelemetry
 	ctx := context.Background()
 	otelShutdown, err := config.InitOtel(ctx)
 	if err != nil {
@@ -36,24 +34,27 @@ func main() {
 		_ = otelShutdown(ctx)
 	}()
 
-	// Initialize Prometheus metrics
 	metricsHandler, err := config.InitMetrics()
 	if err != nil {
 		slog.Error("Failed to initialize metrics", "error", err)
 		os.Exit(1)
 	}
 
-	// Initialize dependency container
-	c, err := container.NewContainer()
+	db, err := config.InitDatabase()
 	if err != nil {
-		slog.Error("Failed to initialize container", "error", err)
+		slog.Error("Failed to connect to database", "error", err)
 		os.Exit(1)
 	}
-	defer func() {
-		_ = c.Close()
-	}()
 
-	// Initialize server
+	redisPool, err := config.InitRedis()
+	if err != nil {
+		slog.Error("Failed to connect to redis", "error", err)
+		os.Exit(1)
+	}
+
+	sessionManager := config.InitSessionManager(redisPool)
+	defer closeConnections(db, redisPool)
+
 	s := fuego.NewServer(
 		fuego.WithAddr("localhost:8080"),
 		fuego.WithEngineOptions(
@@ -63,27 +64,36 @@ func main() {
 		),
 	)
 
-	// Configure routes
-	routes.SetupRoutes(s, c, metricsHandler)
+	routes.SetupRoutes(s, db, redisPool, sessionManager, metricsHandler)
 
 	slog.Info("Server starting", "addr", ":8080")
 
-	// Graceful shutdown
-	go handleShutdown(c)
+	go handleShutdown(db, redisPool)
 
-	// Start server
 	if err := s.Run(); err != nil {
 		slog.Error("Failed to start server", "error", err)
 		os.Exit(1)
 	}
 }
 
-func handleShutdown(c *container.Container) {
+func closeConnections(db *gorm.DB, redisPool *redis.Pool) {
+	slog.Info("Closing connections...")
+
+	if sqlDB, err := db.DB(); err == nil {
+		_ = sqlDB.Close()
+	}
+
+	if redisPool != nil {
+		_ = redisPool.Close()
+	}
+}
+
+func handleShutdown(db *gorm.DB, redisPool *redis.Pool) {
 	sigint := make(chan os.Signal, 1)
 	signal.Notify(sigint, os.Interrupt, syscall.SIGTERM)
 	<-sigint
 
 	slog.Info("Shutting down server...")
-	_ = c.Close()
+	closeConnections(db, redisPool)
 	os.Exit(0)
 }
