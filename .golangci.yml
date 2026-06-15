@@ -14,17 +14,16 @@ linters:
     - revive
     - unconvert
     - unparam
+  exclusions:
+    rules:
+      - path: cmd/atlas/
+        linters:
+          - revive
+      - path: internal/tests/
+        linters:
+          - errcheck
 
 formatters:
   enable:
     - gofmt
     - goimports
-
-issues:
-  exclude-rules:
-    - path: cmd/atlas/
-      linters:
-        - revive
-    - path: internal/tests/
-      linters:
-        - errcheck
