@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log/slog"
 	"os"
 
@@ -9,13 +10,19 @@ import (
 )
 
 func main() {
+	if err := run(); err != nil {
+		slog.Error("seed failed", "error", err)
+		os.Exit(1)
+	}
+}
+
+func run() error {
 	config.Load()
 	config.InitLogger()
 
 	db, err := config.InitDatabase()
 	if err != nil {
-		slog.Error("failed to connect to database", "error", err)
-		os.Exit(1)
+		return fmt.Errorf("connect to database: %w", err)
 	}
 	defer func() {
 		if sqlDB, err := db.DB(); err == nil {
@@ -24,9 +31,9 @@ func main() {
 	}()
 
 	if err := seeders.Run(db); err != nil {
-		slog.Error("failed to run seeders", "error", err)
-		os.Exit(1)
+		return fmt.Errorf("run seeders: %w", err)
 	}
 
 	slog.Info("seeders executed successfully")
+	return nil
 }

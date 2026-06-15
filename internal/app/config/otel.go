@@ -22,7 +22,7 @@ type OtelShutdown func(ctx context.Context) error
 func InitOtel(ctx context.Context) (OtelShutdown, error) {
 	if !Env.OtelEnabled {
 		slog.Info("OpenTelemetry tracing disabled")
-		return func(ctx context.Context) error { return nil }, nil
+		return func(_ context.Context) error { return nil }, nil
 	}
 
 	serviceName := Env.OtelServiceName

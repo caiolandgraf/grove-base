@@ -35,12 +35,12 @@ type Config struct {
 	CORSAllowedOrigins string `env:"CORS_ALLOWED_ORIGINS" envDefault:"http://localhost"`
 
 	// Application
-	ServerAddr  string `env:"SERVER_ADDR"  envDefault:":8080"`
-	Environment string `env:"ENVIRONMENT"  envDefault:"development"`
-	BaseURL     string `env:"BASE_URL,required"`
-	AppName     string `env:"APP_NAME"     envDefault:"Grove Base"`
-	AppDesc     string `env:"APP_DESC"`
-	AppOGDC     string `env:"APP_OGDC"`
+	ServerAddr   string `env:"SERVER_ADDR"  envDefault:":8080"`
+	Environment  string `env:"ENVIRONMENT"  envDefault:"development"`
+	BaseURL      string `env:"BASE_URL,required"`
+	AppName      string `env:"APP_NAME"     envDefault:"Grove Base"`
+	AppDesc      string `env:"APP_DESC"`
+	AppOGDC      string `env:"APP_OGDC"`
 	CookieDomain string `env:"COOKIE_DOMAIN"`
 
 	// Logging

@@ -1,3 +1,4 @@
+// Package types defines shared API request and response DTOs.
 package types
 
 // ErrorResponse is the standard error payload returned by the API.

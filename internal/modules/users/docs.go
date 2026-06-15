@@ -1,8 +1,8 @@
 package users
 
 import (
-	"github.com/caiolandgraf/grove-base/internal/app/types"
 	"github.com/caiolandgraf/grove-base/internal/app/router"
+	"github.com/caiolandgraf/grove-base/internal/app/types"
 )
 
 var ListUsersDoc = router.Doc{

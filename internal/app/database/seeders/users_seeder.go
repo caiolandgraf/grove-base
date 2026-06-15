@@ -1,6 +1,7 @@
 package seeders
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/caiolandgraf/grove-base/internal/modules/users"
@@ -33,11 +34,10 @@ func (UsersSeeder) Seed(db *gorm.DB) error {
 	for _, item := range defaultUsers {
 		var existing users.User
 		err := db.Where("email = ?", item.Email).First(&existing).Error
-
-		switch err {
-		case nil:
+		if err == nil {
 			continue
-		case gorm.ErrRecordNotFound:
+		}
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			hash, hashErr := bcrypt.GenerateFromPassword(
 				[]byte(item.Password),
 				bcrypt.DefaultCost,
@@ -55,9 +55,10 @@ func (UsersSeeder) Seed(db *gorm.DB) error {
 			if createErr := db.Create(&newUser).Error; createErr != nil {
 				return fmt.Errorf("create user %s: %w", item.Email, createErr)
 			}
-		default:
-			return fmt.Errorf("query user %s: %w", item.Email, err)
+			continue
 		}
+
+		return fmt.Errorf("query user %s: %w", item.Email, err)
 	}
 
 	return nil

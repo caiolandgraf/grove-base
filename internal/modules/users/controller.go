@@ -6,8 +6,8 @@ import (
 	"strconv"
 
 	"github.com/alexedwards/scs/v2"
-	"github.com/caiolandgraf/grove-base/internal/app/types"
 	"github.com/caiolandgraf/grove-base/internal/app/router"
+	"github.com/caiolandgraf/grove-base/internal/app/types"
 	"github.com/go-fuego/fuego"
 	"gorm.io/gorm"
 )

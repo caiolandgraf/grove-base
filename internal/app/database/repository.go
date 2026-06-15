@@ -373,7 +373,7 @@ func (r *Repository[T]) Fill(dst *T, src any) *Repository[T] {
 	}
 
 	srcVal := reflect.ValueOf(src)
-	if srcVal.Kind() == reflect.Ptr {
+	if srcVal.Kind() == reflect.Pointer {
 		if srcVal.IsNil() {
 			return r
 		}
@@ -420,13 +420,13 @@ func (r *Repository[T]) Fill(dst *T, src any) *Repository[T] {
 				dstFieldVal.Set(srcFieldVal)
 			}
 
-		case srcFieldVal.Kind() == reflect.Ptr && dstFieldVal.Kind() != reflect.Ptr:
+		case srcFieldVal.Kind() == reflect.Pointer && dstFieldVal.Kind() != reflect.Pointer:
 			if !srcFieldVal.IsNil() &&
 				srcFieldVal.Elem().Type() == dstFieldVal.Type() {
 				dstFieldVal.Set(srcFieldVal.Elem())
 			}
 
-		case srcFieldVal.Kind() == reflect.Ptr && dstFieldVal.Kind() == reflect.Ptr:
+		case srcFieldVal.Kind() == reflect.Pointer && dstFieldVal.Kind() == reflect.Pointer:
 			if !srcFieldVal.IsNil() &&
 				srcFieldVal.Type() == dstFieldVal.Type() {
 				dstFieldVal.Set(srcFieldVal)

@@ -10,7 +10,7 @@ import (
 
 func EncodeJson[T any](
 	w http.ResponseWriter,
-	r *http.Request,
+	_ *http.Request,
 	statusCode int,
 	data T,
 ) error {

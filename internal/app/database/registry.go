@@ -1,3 +1,4 @@
+// Package database provides GORM repository helpers and Atlas model registration.
 package database
 
 var registry []any

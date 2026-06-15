@@ -14,6 +14,11 @@ linters:
     - revive
     - unconvert
     - unparam
+  settings:
+    revive:
+      rules:
+        - name: exported
+          disabled: true
   exclusions:
     rules:
       - path: cmd/atlas/

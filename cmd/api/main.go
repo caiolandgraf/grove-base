@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"os"
@@ -17,14 +18,20 @@ import (
 )
 
 func main() {
+	if err := run(); err != nil {
+		slog.Error("application failed", "error", err)
+		os.Exit(1)
+	}
+}
+
+func run() error {
 	config.Load()
 	config.InitLogger()
 
 	ctx := context.Background()
 	otelShutdown, err := config.InitOtel(ctx)
 	if err != nil {
-		slog.Error("Failed to initialize OpenTelemetry", "error", err)
-		os.Exit(1)
+		return fmt.Errorf("initialize OpenTelemetry: %w", err)
 	}
 	defer func() {
 		_ = otelShutdown(ctx)
@@ -34,8 +41,7 @@ func main() {
 	if config.Env.MetricsEnabled {
 		metricsHandler, err = config.InitMetrics()
 		if err != nil {
-			slog.Error("Failed to initialize metrics", "error", err)
-			os.Exit(1)
+			return fmt.Errorf("initialize metrics: %w", err)
 		}
 	} else {
 		slog.Info("Prometheus metrics disabled")
@@ -43,14 +49,12 @@ func main() {
 
 	db, err := config.InitDatabase()
 	if err != nil {
-		slog.Error("Failed to connect to database", "error", err)
-		os.Exit(1)
+		return fmt.Errorf("connect to database: %w", err)
 	}
 
 	redisPool, err := config.InitRedis()
 	if err != nil {
-		slog.Error("Failed to connect to redis", "error", err)
-		os.Exit(1)
+		return fmt.Errorf("connect to redis: %w", err)
 	}
 
 	sessionManager := config.InitSessionManager(redisPool)
@@ -72,9 +76,10 @@ func main() {
 	go handleShutdown(db, redisPool)
 
 	if err := s.Run(); err != nil {
-		slog.Error("Failed to start server", "error", err)
-		os.Exit(1)
+		return fmt.Errorf("start server: %w", err)
 	}
+
+	return nil
 }
 
 func closeConnections(db *gorm.DB, redisPool *redis.Pool) {
