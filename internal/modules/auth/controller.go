@@ -4,8 +4,8 @@ import (
 	"net/http"
 
 	"github.com/alexedwards/scs/v2"
-	"github.com/caiolandgraf/grove-base/internal/modules/users"
 	"github.com/caiolandgraf/grove-base/internal/app/router"
+	"github.com/caiolandgraf/grove-base/internal/modules/users"
 	"github.com/go-fuego/fuego"
 	"gorm.io/gorm"
 )
