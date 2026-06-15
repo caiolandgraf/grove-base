@@ -551,11 +551,13 @@ Runs on every push and pull request to `main`:
 Run the same checks locally:
 
 ```
-golangci-lint run ./...
+grove check
 grove test
-grove build
+grove build:binaries
 atlas migrate validate --env local
 ```
+
+Before committing, run `grove prepare` to format, fix lint issues, test, and build.
 
 Install golangci-lint: [golangci-lint install](https://golangci-lint.run/welcome/install/)
 
