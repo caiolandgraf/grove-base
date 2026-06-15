@@ -1,7 +1,7 @@
 package routes
 
 import (
-	"github.com/caiolandgraf/go-project-base/internal/app/types"
+	"github.com/caiolandgraf/grove-base/internal/app/types"
 	"github.com/go-fuego/fuego"
 	"github.com/gomodule/redigo/redis"
 	"gorm.io/gorm"

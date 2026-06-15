@@ -8,25 +8,7 @@ import (
 	"github.com/gomodule/redigo/redis"
 )
 
-type RedisConfig struct {
-	Host     string
-	Port     string
-	Password string
-	DB       int
-}
-
-func LoadRedisConfig() *RedisConfig {
-	return &RedisConfig{
-		Host:     getEnv("REDIS_HOST", "localhost"),
-		Port:     getEnv("REDIS_PORT", "6379"),
-		Password: getEnv("REDIS_PASSWORD", ""),
-		DB:       0,
-	}
-}
-
 func InitRedis() (*redis.Pool, error) {
-	config := LoadRedisConfig()
-
 	pool := &redis.Pool{
 		MaxIdle:     10,
 		MaxActive:   100,
@@ -34,21 +16,21 @@ func InitRedis() (*redis.Pool, error) {
 		Dial: func() (redis.Conn, error) {
 			c, err := redis.Dial(
 				"tcp",
-				fmt.Sprintf("%s:%s", config.Host, config.Port),
+				fmt.Sprintf("%s:%d", Env.RedisHost, Env.RedisPort),
 			)
 			if err != nil {
 				return nil, err
 			}
 
-			if config.Password != "" {
-				if _, err := c.Do("AUTH", config.Password); err != nil {
-					c.Close()
+			if Env.RedisPassword != "" {
+				if _, err := c.Do("AUTH", Env.RedisPassword); err != nil {
+					_ = c.Close()
 					return nil, err
 				}
 			}
 
-			if _, err := c.Do("SELECT", config.DB); err != nil {
-				c.Close()
+			if _, err := c.Do("SELECT", 0); err != nil {
+				_ = c.Close()
 				return nil, err
 			}
 
@@ -63,17 +45,18 @@ func InitRedis() (*redis.Pool, error) {
 		},
 	}
 
-	// Test connection
 	conn := pool.Get()
-	defer conn.Close()
+	defer func() {
+		_ = conn.Close()
+	}()
 
 	if _, err := conn.Do("PING"); err != nil {
 		return nil, fmt.Errorf("failed to connect to redis: %w", err)
 	}
 
 	slog.Info("Redis connected successfully",
-		"host", config.Host,
-		"port", config.Port,
+		"host", Env.RedisHost,
+		"port", Env.RedisPort,
 	)
 
 	return pool, nil

@@ -4,7 +4,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/caiolandgraf/go-project-base/internal/app/database"
+	"github.com/caiolandgraf/grove-base/internal/app/database"
 	"gorm.io/gorm"
 )
 

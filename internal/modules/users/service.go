@@ -15,12 +15,22 @@ type Service interface {
 	DeleteUser(id string) error
 }
 
-type service struct {
-	repo *Repo
+// Store abstracts persistence for user operations (enables mocks in tests).
+type Store interface {
+	Create(user *User) error
+	FindByEmail(email string) (*User, error)
+	FindByID(id string) (*User, error)
+	FindAll(page, perPage int) ([]User, int64, error)
+	Update(user *User) error
+	Delete(id any) error
 }
 
-func NewService(repo *Repo) Service {
-	return &service{repo: repo}
+type service struct {
+	store Store
+}
+
+func NewService(store Store) Service {
+	return &service{store: store}
 }
 
 func WireService(db *gorm.DB) Service {
@@ -30,7 +40,7 @@ func WireService(db *gorm.DB) Service {
 var ErrEmailAlreadyExists = errors.New("email already exists")
 
 func (s *service) CreateUser(req *CreateUserRequest) (*UserResponse, error) {
-	existing, _ := s.repo.FindByEmail(req.Email)
+	existing, _ := s.store.FindByEmail(req.Email)
 	if existing != nil {
 		return nil, ErrEmailAlreadyExists
 	}
@@ -49,7 +59,7 @@ func (s *service) CreateUser(req *CreateUserRequest) (*UserResponse, error) {
 		Password: string(hashedPassword),
 	}
 
-	if err := s.repo.Create(user); err != nil {
+	if err := s.store.Create(user); err != nil {
 		return nil, err
 	}
 
@@ -57,7 +67,7 @@ func (s *service) CreateUser(req *CreateUserRequest) (*UserResponse, error) {
 }
 
 func (s *service) GetUserByID(id string) (*UserResponse, error) {
-	user, err := s.repo.FindByID(id)
+	user, err := s.store.FindByID(id)
 	if err != nil {
 		return nil, err
 	}
@@ -72,8 +82,7 @@ func (s *service) GetUsers(page, size int) (*UsersListResponse, error) {
 		size = 10
 	}
 
-	offset := (page - 1) * size
-	users, total, err := s.repo.FindAll(size, offset)
+	users, total, err := s.store.FindAll(page, size)
 	if err != nil {
 		return nil, err
 	}
@@ -93,7 +102,7 @@ func (s *service) UpdateUser(
 	id string,
 	req *UpdateUserRequest,
 ) (*UserResponse, error) {
-	user, err := s.repo.FindByID(id)
+	user, err := s.store.FindByID(id)
 	if err != nil {
 		return nil, err
 	}
@@ -105,7 +114,7 @@ func (s *service) UpdateUser(
 		user.Email = req.Email
 	}
 
-	if err := s.repo.Update(user); err != nil {
+	if err := s.store.Update(user); err != nil {
 		return nil, err
 	}
 
@@ -113,7 +122,7 @@ func (s *service) UpdateUser(
 }
 
 func (s *service) DeleteUser(id string) error {
-	return s.repo.Delete(id)
+	return s.store.Delete(id)
 }
 
 func modelToDTO(user *User) *UserResponse {

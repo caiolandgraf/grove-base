@@ -1,0 +1,142 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v7
+        with:
+          version: v2.1.6
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    env:
+      BASE_URL: http://localhost:8080
+      DB_HOST: localhost
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_NAME: grove_db
+      DB_SSLMODE: disable
+      OTEL_ENABLED: "false"
+      METRICS_ENABLED: "false"
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: grove_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Set up Atlas
+        uses: ariga/setup-atlas@v0
+
+      - name: Apply migrations
+        run: atlas migrate apply --env local
+
+      - name: Run tests
+        run: go test -race -count=1 -coverprofile=coverage.out ./...
+
+      - name: Coverage summary
+        run: go tool cover -func=coverage.out
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Build binaries
+        run: |
+          mkdir -p .grove/bin
+          go build -trimpath -ldflags="-s -w" -o .grove/bin/api ./cmd/api
+          go build -trimpath -ldflags="-s -w" -o .grove/bin/atlas ./cmd/atlas
+
+      - name: Upload API binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-${{ runner.os }}
+          path: .grove/bin/api
+          if-no-files-found: error
+
+  migrations:
+    name: Migrations
+    runs-on: ubuntu-latest
+    env:
+      BASE_URL: http://localhost:8080
+      DB_HOST: localhost
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_NAME: grove_db
+      DB_SSLMODE: disable
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Set up Atlas
+        uses: ariga/setup-atlas@v0
+
+      - name: Validate migrations
+        run: atlas migrate validate --env local
+
+      - name: Lint migrations
+        run: atlas migrate lint --env local --latest 1

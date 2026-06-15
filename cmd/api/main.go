@@ -3,25 +3,21 @@ package main
 import (
 	"context"
 	"log/slog"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 
-	"github.com/caiolandgraf/go-project-base/cmd/scalar"
-	"github.com/caiolandgraf/go-project-base/internal/app/config"
-	"github.com/caiolandgraf/go-project-base/internal/routes"
+	"github.com/caiolandgraf/grove-base/cmd/scalar"
+	"github.com/caiolandgraf/grove-base/internal/app/config"
+	"github.com/caiolandgraf/grove-base/internal/routes"
 	"github.com/go-fuego/fuego"
 	"github.com/gomodule/redigo/redis"
-	"github.com/joho/godotenv"
 	"gorm.io/gorm"
 )
 
 func main() {
-	err := godotenv.Load()
-	if err != nil {
-		panic(".env not found")
-	}
-
+	config.Load()
 	config.InitLogger()
 
 	ctx := context.Background()
@@ -34,10 +30,15 @@ func main() {
 		_ = otelShutdown(ctx)
 	}()
 
-	metricsHandler, err := config.InitMetrics()
-	if err != nil {
-		slog.Error("Failed to initialize metrics", "error", err)
-		os.Exit(1)
+	var metricsHandler http.Handler
+	if config.Env.MetricsEnabled {
+		metricsHandler, err = config.InitMetrics()
+		if err != nil {
+			slog.Error("Failed to initialize metrics", "error", err)
+			os.Exit(1)
+		}
+	} else {
+		slog.Info("Prometheus metrics disabled")
 	}
 
 	db, err := config.InitDatabase()
@@ -56,7 +57,7 @@ func main() {
 	defer closeConnections(db, redisPool)
 
 	s := fuego.NewServer(
-		fuego.WithAddr("localhost:8080"),
+		fuego.WithAddr(config.Env.ServerAddr),
 		fuego.WithEngineOptions(
 			fuego.WithOpenAPIConfig(fuego.OpenAPIConfig{
 				UIHandler: scalar.NewUI,
@@ -66,7 +67,7 @@ func main() {
 
 	routes.SetupRoutes(s, db, redisPool, sessionManager, metricsHandler)
 
-	slog.Info("Server starting", "addr", ":8080")
+	slog.Info("Server starting", "addr", config.Env.ServerAddr)
 
 	go handleShutdown(db, redisPool)
 

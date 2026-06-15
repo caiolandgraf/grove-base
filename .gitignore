@@ -8,7 +8,6 @@
 # ========================
 # Go
 # ========================
-bin/
 tmp/
 *.exe
 *.exe~
@@ -19,11 +18,15 @@ tmp/
 *.out
 *.prof
 *.pprof
-go.sum
 vendor/
 coverage.out
 coverage.html
 coverage.txt
+
+# ========================
+# Grove CLI
+# ========================
+.grove/
 
 # ========================
 # Air (hot reload)
@@ -102,12 +105,6 @@ debug.test
 build-errors.log
 
 # ========================
-# Logs (Promtail collection)
-# ========================
-logs/*
-!logs/.gitkeep
-
-# ========================
 # Testing
 # ========================
 testdata/
@@ -116,13 +113,8 @@ testdata/
 # ========================
 # Atlas (migrations tool)
 # ========================
-# Keep migrations/ tracked, but ignore local atlas state
+# Keep internal/app/database/migrations/ tracked, but ignore local atlas state
 .atlas/
-
-# ========================
-# Documentation artifacts
-# ========================
-doc/openapi.json
 
 # ========================
 # Grafana / Observability

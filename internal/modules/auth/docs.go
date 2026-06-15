@@ -1,9 +1,9 @@
 package auth
 
 import (
-	"github.com/caiolandgraf/go-project-base/internal/app/types"
-	"github.com/caiolandgraf/go-project-base/internal/modules/users"
-	"github.com/caiolandgraf/go-project-base/internal/app/router"
+	"github.com/caiolandgraf/grove-base/internal/app/types"
+	"github.com/caiolandgraf/grove-base/internal/modules/users"
+	"github.com/caiolandgraf/grove-base/internal/app/router"
 )
 
 var LoginDoc = router.Doc{

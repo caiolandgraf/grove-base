@@ -48,7 +48,7 @@ services:
     command: -config.file=/etc/promtail/config.yml
     volumes:
       - ./infra/promtail-config.yml:/etc/promtail/config.yml:ro
-      - ./logs:/var/log/app:ro
+      - ./.grove/logs:/var/log/app:ro
     depends_on:
       - loki
 

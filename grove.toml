@@ -1,0 +1,8 @@
+[dev]
+root        = "."
+bin         = ".grove/tmp/app"
+build_cmd   = "go build -o .grove/tmp/app ./cmd/api/"
+watch_dirs  = ["cmd", "internal"]
+exclude     = [".grove", "vendor", "node_modules", ".git", "infra", "internal/app/database/migrations", "internal/tests"]
+extensions  = [".go"]
+debounce_ms = 50

@@ -6,8 +6,8 @@ import (
 	"os"
 
 	"ariga.io/atlas-provider-gorm/gormschema"
-	_ "github.com/caiolandgraf/go-project-base/internal/modules" // load modules → model init() registrations
-	"github.com/caiolandgraf/go-project-base/internal/app/database"
+	_ "github.com/caiolandgraf/grove-base/internal/modules" // load modules → model init() registrations
+	"github.com/caiolandgraf/grove-base/internal/app/database"
 )
 
 func main() {

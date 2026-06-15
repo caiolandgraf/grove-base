@@ -2,7 +2,7 @@ package router
 
 import (
 	"github.com/alexedwards/scs/v2"
-	"github.com/caiolandgraf/go-project-base/internal/app/middleware"
+	"github.com/caiolandgraf/grove-base/internal/app/middleware"
 	"github.com/go-fuego/fuego"
 	"github.com/go-fuego/fuego/option"
 )

@@ -1,0 +1,10 @@
+.git
+.github
+.grove
+.env
+.env.*
+!.env.example
+tmp/
+infra/grafana/
+docker-compose.yml
+jaeger-ui.json

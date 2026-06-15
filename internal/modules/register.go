@@ -1,8 +1,8 @@
 package modules
 
 import (
-	"github.com/caiolandgraf/go-project-base/internal/modules/auth"
-	"github.com/caiolandgraf/go-project-base/internal/modules/users"
+	"github.com/caiolandgraf/grove-base/internal/modules/auth"
+	"github.com/caiolandgraf/grove-base/internal/modules/users"
 	"github.com/go-fuego/fuego"
 )
 

@@ -1,6 +1,6 @@
 package auth
 
-import "github.com/caiolandgraf/go-project-base/internal/modules/users"
+import "github.com/caiolandgraf/grove-base/internal/modules/users"
 
 type LoginRequest struct {
 	Email    string `json:"email" validate:"required,email" example:"jane@example.com"`

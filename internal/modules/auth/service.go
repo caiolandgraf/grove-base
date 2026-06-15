@@ -3,7 +3,7 @@ package auth
 import (
 	"errors"
 
-	"github.com/caiolandgraf/go-project-base/internal/modules/users"
+	"github.com/caiolandgraf/grove-base/internal/modules/users"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
@@ -15,11 +15,11 @@ type Service interface {
 }
 
 type service struct {
-	userRepo *users.Repo
+	users users.Store
 }
 
-func NewService(userRepo *users.Repo) Service {
-	return &service{userRepo: userRepo}
+func NewService(store users.Store) Service {
+	return &service{users: store}
 }
 
 func WireService(db *gorm.DB) Service {
@@ -27,7 +27,7 @@ func WireService(db *gorm.DB) Service {
 }
 
 func (s *service) Login(email, password string) (*users.UserResponse, error) {
-	user, err := s.userRepo.FindByEmail(email)
+	user, err := s.users.FindByEmail(email)
 	if err != nil {
 		return nil, errors.New("invalid credentials")
 	}
@@ -45,7 +45,7 @@ func (s *service) Login(email, password string) (*users.UserResponse, error) {
 }
 
 func (s *service) Register(req *RegisterRequest) (*users.UserResponse, error) {
-	existing, _ := s.userRepo.FindByEmail(req.Email)
+	existing, _ := s.users.FindByEmail(req.Email)
 	if existing != nil {
 		return nil, errors.New("email already exists")
 	}
@@ -57,7 +57,7 @@ func (s *service) Register(req *RegisterRequest) (*users.UserResponse, error) {
 }
 
 func (s *service) ValidateUser(userID string) (*users.UserResponse, error) {
-	user, err := s.userRepo.FindByID(userID)
+	user, err := s.users.FindByID(userID)
 	if err != nil {
 		return nil, errors.New("user not found")
 	}
