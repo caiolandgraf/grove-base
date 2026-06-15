@@ -30,7 +30,8 @@ jobs:
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v7
         with:
-          version: v2.1.6
+          # v2.4.0+ required: binaries must be built with Go >= project's go.mod version (1.25.5)
+          version: v2.12.2
 
   test:
     name: Test
@@ -75,6 +76,9 @@ jobs:
 
       - name: Set up Atlas
         uses: ariga/setup-atlas@v0
+        with:
+          # Pin below v0.38: migrate lint requires Atlas Pro starting in v0.38
+          version: v0.37.0
 
       - name: Apply migrations
         run: atlas migrate apply --env local
@@ -134,6 +138,9 @@ jobs:
 
       - name: Set up Atlas
         uses: ariga/setup-atlas@v0
+        with:
+          # Pin below v0.38: migrate lint requires Atlas Pro starting in v0.38
+          version: v0.37.0
 
       - name: Validate migrations
         run: atlas migrate validate --env local
