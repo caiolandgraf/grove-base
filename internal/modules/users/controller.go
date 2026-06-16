@@ -4,8 +4,10 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/alexedwards/scs/v2"
+	"github.com/caiolandgraf/grove-base/internal/app/helpers/ratelimiter"
 	"github.com/caiolandgraf/grove-base/internal/app/router"
 	"github.com/caiolandgraf/grove-base/internal/app/types"
 	"github.com/go-fuego/fuego"
@@ -14,10 +16,14 @@ import (
 
 type Controller struct {
 	service Service
+	rl      *ratelimiter.Func
 }
 
 func NewController(service Service) *Controller {
-	return &Controller{service: service}
+	return &Controller{
+		service: service,
+		rl:      ratelimiter.New(5, 30*time.Second),
+	}
 }
 
 func Wire(db *gorm.DB) *Controller {
@@ -37,6 +43,10 @@ func (ctrl *Controller) Mount(api *fuego.Server, session *scs.SessionManager) {
 func (ctrl *Controller) GetUser(
 	c fuego.ContextNoBody,
 ) (*UserResponse, error) {
+	if err := ctrl.rl.Check(c.Request()); err != nil {
+		return nil, err
+	}
+
 	userID := c.PathParam("user_id")
 
 	user, err := ctrl.service.GetUserByID(userID)
@@ -53,6 +63,10 @@ func (ctrl *Controller) GetUser(
 func (ctrl *Controller) ListUsers(
 	c fuego.ContextNoBody,
 ) (*UsersListResponse, error) {
+	if err := ctrl.rl.Check(c.Request()); err != nil {
+		return nil, err
+	}
+
 	page, _ := strconv.Atoi(c.QueryParam("page"))
 	size, _ := strconv.Atoi(c.QueryParam("size"))
 
@@ -77,6 +91,10 @@ func (ctrl *Controller) ListUsers(
 func (ctrl *Controller) CreateUser(
 	c fuego.ContextWithBody[CreateUserRequest],
 ) (*UserResponse, error) {
+	if err := ctrl.rl.Check(c.Request()); err != nil {
+		return nil, err
+	}
+
 	body, err := c.Body()
 	if err != nil {
 		return nil, fuego.HTTPError{
@@ -107,6 +125,10 @@ func (ctrl *Controller) CreateUser(
 func (ctrl *Controller) UpdateUser(
 	c fuego.ContextWithBody[UpdateUserRequest],
 ) (*UserResponse, error) {
+	if err := ctrl.rl.Check(c.Request()); err != nil {
+		return nil, err
+	}
+
 	userID := c.PathParam("user_id")
 	body, err := c.Body()
 	if err != nil {
@@ -130,6 +152,10 @@ func (ctrl *Controller) UpdateUser(
 func (ctrl *Controller) DeleteUser(
 	c fuego.ContextNoBody,
 ) (*types.MessageResponse, error) {
+	if err := ctrl.rl.Check(c.Request()); err != nil {
+		return nil, err
+	}
+
 	userID := c.PathParam("user_id")
 
 	err := ctrl.service.DeleteUser(userID)
