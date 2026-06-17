@@ -2,6 +2,7 @@ package modules
 
 import (
 	"github.com/alexedwards/scs/v2"
+	"github.com/caiolandgraf/grove-base/internal/app/helpers/ratelimiter"
 	"github.com/go-fuego/fuego"
 	"gorm.io/gorm"
 )
@@ -14,8 +15,9 @@ type Module interface {
 
 // Boot carries infra dependencies available at application startup.
 type Boot struct {
-	DB      *gorm.DB
-	Session *scs.SessionManager
+	DB        *gorm.DB
+	Session   *scs.SessionManager
+	RateLimit ratelimiter.Settings
 }
 
 // Factory builds a Module from runtime infra. Register new domains in register.go.

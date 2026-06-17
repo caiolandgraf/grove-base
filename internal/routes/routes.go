@@ -36,5 +36,9 @@ func SetupRoutes(
 	}
 
 	api := fuego.Group(s, "/api/v1")
-	modules.Mount(api, modules.Boot{DB: db, Session: session})
+	modules.Mount(api, modules.Boot{
+		DB:        db,
+		Session:   session,
+		RateLimit: config.RateLimitSettings(),
+	})
 }

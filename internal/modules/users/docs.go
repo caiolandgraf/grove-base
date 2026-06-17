@@ -18,6 +18,7 @@ var ListUsersDoc = router.Doc{
 	},
 	Responses: map[int]router.Response{
 		200: {Description: "Paginated user list", Type: UsersListResponse{}},
+		429: {Description: "Rate limit exceeded", Type: types.ErrorResponse{}},
 		500: {Description: "Internal server error", Type: types.ErrorResponse{}},
 	},
 }
@@ -33,6 +34,7 @@ var CreateUserDoc = router.Doc{
 		200: {Description: "User created", Type: UserResponse{}},
 		400: {Description: "Validation error", Type: types.ErrorResponse{}},
 		409: {Description: "Email already exists", Type: types.ErrorResponse{}},
+		429: {Description: "Rate limit exceeded", Type: types.ErrorResponse{}},
 	},
 }
 
@@ -46,6 +48,7 @@ var GetUserDoc = router.Doc{
 	Responses: map[int]router.Response{
 		200: {Description: "User found", Type: UserResponse{}},
 		404: {Description: "User not found", Type: types.ErrorResponse{}},
+		429: {Description: "Rate limit exceeded", Type: types.ErrorResponse{}},
 	},
 }
 
@@ -60,6 +63,7 @@ var UpdateUserDoc = router.Doc{
 		200: {Description: "User updated", Type: UserResponse{}},
 		400: {Description: "Validation error", Type: types.ErrorResponse{}},
 		404: {Description: "User not found", Type: types.ErrorResponse{}},
+		429: {Description: "Rate limit exceeded", Type: types.ErrorResponse{}},
 	},
 }
 
@@ -73,5 +77,6 @@ var DeleteUserDoc = router.Doc{
 	Responses: map[int]router.Response{
 		200: {Description: "User deleted", Type: types.MessageResponse{}},
 		404: {Description: "User not found", Type: types.ErrorResponse{}},
+		429: {Description: "Rate limit exceeded", Type: types.ErrorResponse{}},
 	},
 }

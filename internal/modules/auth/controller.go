@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/alexedwards/scs/v2"
+	"github.com/caiolandgraf/grove-base/internal/app/helpers/ratelimiter"
 	"github.com/caiolandgraf/grove-base/internal/app/router"
 	"github.com/caiolandgraf/grove-base/internal/modules/users"
 	"github.com/go-fuego/fuego"
@@ -14,32 +15,36 @@ type Controller struct {
 	authService    Service
 	userService    users.Service
 	sessionManager *scs.SessionManager
+	rateLimit      ratelimiter.Settings
 }
 
 func NewController(
 	authService Service,
 	userService users.Service,
 	session *scs.SessionManager,
+	settings ratelimiter.Settings,
 ) *Controller {
 	return &Controller{
 		authService:    authService,
 		userService:    userService,
 		sessionManager: session,
+		rateLimit:      settings,
 	}
 }
 
-func Wire(db *gorm.DB, session *scs.SessionManager) *Controller {
+func Wire(db *gorm.DB, session *scs.SessionManager, settings ratelimiter.Settings) *Controller {
 	repo := users.Users(db)
 	return NewController(
 		NewService(repo),
 		users.NewService(repo),
 		session,
+		settings,
 	)
 }
 
 func (ctrl *Controller) Mount(api *fuego.Server, session *scs.SessionManager) {
 	group := fuego.Group(api, "/auth")
-	userHandlers := users.NewController(ctrl.userService)
+	userHandlers := users.NewController(ctrl.userService, ctrl.rateLimit)
 
 	router.Post(group, "/login", ctrl.Login, LoginDoc, session)
 	router.Post(group, "/register", userHandlers.CreateUser, RegisterDoc, session)

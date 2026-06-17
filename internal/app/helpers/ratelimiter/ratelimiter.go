@@ -2,7 +2,9 @@ package ratelimiter
 
 import (
 	"errors"
+	"net"
 	"net/http"
+	"strconv"
 	"sync"
 	"time"
 
@@ -15,11 +17,11 @@ type entry struct {
 	lastSeen time.Time
 }
 
-// Func is a per-IP rate limiter.
+// Limiter is a per-IP rate limiter.
 // Instantiate once (e.g. as a Controller field) and call Check on every request.
 //
 //	type Controller struct {
-//	    rl *ratelimiter.Func
+//	    rl *ratelimiter.Limiter
 //	}
 //
 //	func NewController(service Service) *Controller {
@@ -27,90 +29,136 @@ type entry struct {
 //	}
 //
 //	func (ctrl *Controller) MyHandler(c fuego.ContextNoBody) (*MyResponse, error) {
-//	    if err := ctrl.rl.Check(c.Request()); err != nil {
+//	    if err := ctrl.rl.Check(c.Response(), c.Request()); err != nil {
 //	        return nil, err // automatically returns HTTP 429
 //	    }
 //	    // ... handler logic
 //	}
-type Func struct {
-	mu      sync.Mutex
-	entries map[string]*entry
-	limit   int
-	window  time.Duration
+type Limiter struct {
+	mu             sync.Mutex
+	entries        map[string]*entry
+	limit          int
+	window         time.Duration
+	trustedProxies []*net.IPNet
 }
 
-// New creates a per-IP Func that allows up to `limit` events per `window` for each IP.
+// Option configures a Limiter.
+type Option func(*Limiter)
+
+// WithTrustedProxies enables reading the client IP from X-Forwarded-For / X-Real-IP
+// when the direct peer matches one of the trusted proxies.
+func WithTrustedProxies(proxies ...*net.IPNet) Option {
+	return func(l *Limiter) {
+		l.trustedProxies = proxies
+	}
+}
+
+// New creates a per-IP Limiter that allows up to `limit` events per `window` for each IP.
 //
 //	rl := ratelimiter.New(5, 50*time.Second) // 5 requests per IP per 50 seconds
-func New(limit int, window time.Duration) *Func {
-	f := &Func{
+func New(limit int, window time.Duration, opts ...Option) *Limiter {
+	if limit < 1 {
+		limit = 1
+	}
+	if window < time.Second {
+		window = time.Second
+	}
+
+	l := &Limiter{
 		entries: make(map[string]*entry),
 		limit:   limit,
 		window:  window,
 	}
-	go f.cleanup()
-	return f
+	for _, opt := range opts {
+		opt(l)
+	}
+	go l.cleanup()
+	return l
 }
 
-func (f *Func) limiterFor(ip string) *rate.Limiter {
-	f.mu.Lock()
-	defer f.mu.Unlock()
+func (l *Limiter) limiterFor(ip string) *rate.Limiter {
+	l.mu.Lock()
+	defer l.mu.Unlock()
 
-	e, ok := f.entries[ip]
+	e, ok := l.entries[ip]
 	if !ok {
-		r := rate.Limit(float64(f.limit) / f.window.Seconds())
-		e = &entry{limiter: rate.NewLimiter(r, f.limit)}
-		f.entries[ip] = e
+		r := rate.Limit(float64(l.limit) / l.window.Seconds())
+		e = &entry{limiter: rate.NewLimiter(r, l.limit)}
+		l.entries[ip] = e
 	}
 	e.lastSeen = time.Now()
 	return e.limiter
 }
 
-// cleanup removes IPs that haven't been seen for 2× the window, preventing memory leaks.
-func (f *Func) cleanup() {
-	ticker := time.NewTicker(f.window * 2)
+func (l *Limiter) cleanup() {
+	ticker := time.NewTicker(l.window * 2)
 	defer ticker.Stop()
 	for range ticker.C {
-		f.mu.Lock()
-		for ip, e := range f.entries {
-			if time.Since(e.lastSeen) > f.window*2 {
-				delete(f.entries, ip)
+		l.mu.Lock()
+		for ip, e := range l.entries {
+			if time.Since(e.lastSeen) > l.window*2 {
+				delete(l.entries, ip)
 			}
 		}
-		f.mu.Unlock()
+		l.mu.Unlock()
+	}
+}
+
+func (l *Limiter) writeHeaders(w http.ResponseWriter, remaining int, retryAfter time.Duration) {
+	if w == nil {
+		return
+	}
+
+	w.Header().Set("X-RateLimit-Limit", strconv.Itoa(l.limit))
+	if remaining < 0 {
+		remaining = 0
+	}
+	w.Header().Set("X-RateLimit-Remaining", strconv.Itoa(remaining))
+
+	if retryAfter > 0 {
+		seconds := int(retryAfter.Round(time.Second).Seconds())
+		if seconds < 1 {
+			seconds = 1
+		}
+		w.Header().Set("Retry-After", strconv.Itoa(seconds))
 	}
 }
 
 // Check verifies whether the request IP is within the rate limit.
 // Returns a fuego.HTTPError with status 429 if the limit is exceeded.
-// Use this as a one-liner inside fuego handlers.
+// Pass the response writer to emit X-RateLimit-* and Retry-After headers.
 //
-//	if err := ctrl.rl.Check(c.Request()); err != nil {
+//	if err := ctrl.rl.Check(c.Response(), c.Request()); err != nil {
 //	    return nil, err
 //	}
-func (f *Func) Check(r *http.Request) error {
-	ip := r.RemoteAddr
-	// Strip port if present (e.g. "192.168.1.1:5432" → "192.168.1.1")
-	if host, _, err := splitHostPort(ip); err == nil {
-		ip = host
+func (l *Limiter) Check(w http.ResponseWriter, r *http.Request) error {
+	ip := clientIP(r, l.trustedProxies)
+	lim := l.limiterFor(ip)
+
+	reservation := lim.Reserve()
+	if !reservation.OK() {
+		l.writeHeaders(w, 0, l.window)
+		return l.tooManyRequests()
 	}
 
-	if !f.limiterFor(ip).Allow() {
-		return fuego.HTTPError{
-			Status: http.StatusTooManyRequests,
-			Title:  "rate limit exceeded",
-			Err:    errors.New("too many requests"),
-		}
+	if delay := reservation.DelayFrom(time.Now()); delay > 0 {
+		reservation.Cancel()
+		l.writeHeaders(w, 0, delay)
+		return l.tooManyRequests()
 	}
+
+	remaining := int(lim.Tokens())
+	l.writeHeaders(w, remaining, 0)
 	return nil
 }
 
-func splitHostPort(hostport string) (host, port string, err error) {
-	// minimal split to avoid importing net just for this
-	for i := len(hostport) - 1; i >= 0; i-- {
-		if hostport[i] == ':' {
-			return hostport[:i], hostport[i+1:], nil
-		}
+func (l *Limiter) tooManyRequests() error {
+	return fuego.HTTPError{
+		Status: http.StatusTooManyRequests,
+		Title:  "rate limit exceeded",
+		Err:    errors.New("too many requests"),
 	}
-	return "", "", errors.New("no port")
 }
+
+// Func is an alias kept for backward compatibility.
+type Func = Limiter

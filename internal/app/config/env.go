@@ -46,6 +46,13 @@ type Config struct {
 	// Logging
 	LogLevel string `env:"LOG_LEVEL" envDefault:"info"`
 	LogFile  string `env:"LOG_FILE"  envDefault:".grove/logs/app.log"`
+
+	// Rate limiting
+	RateLimitLimit            int    `env:"RATE_LIMIT_LIMIT"               envDefault:"5"`
+	RateLimitWindowSec        int    `env:"RATE_LIMIT_WINDOW_SEC"        envDefault:"30"`
+	RateLimitWriteLimit       int    `env:"RATE_LIMIT_WRITE_LIMIT"       envDefault:"3"`
+	RateLimitWriteWindowSec   int    `env:"RATE_LIMIT_WRITE_WINDOW_SEC"  envDefault:"60"`
+	RateLimitTrustedProxies   string `env:"RATE_LIMIT_TRUSTED_PROXIES"`
 }
 
 var Env Config

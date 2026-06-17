@@ -4,7 +4,6 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/alexedwards/scs/v2"
 	"github.com/caiolandgraf/grove-base/internal/app/helpers/ratelimiter"
@@ -16,18 +15,32 @@ import (
 
 type Controller struct {
 	service Service
-	rl      *ratelimiter.Func
+	readRL  *ratelimiter.Limiter
+	writeRL *ratelimiter.Limiter
 }
 
-func NewController(service Service) *Controller {
+func NewController(service Service, settings ratelimiter.Settings) *Controller {
+	opts := []ratelimiter.Option{
+		ratelimiter.WithTrustedProxies(settings.TrustedProxies...),
+	}
+
 	return &Controller{
 		service: service,
-		rl:      ratelimiter.New(5, 30*time.Second),
+		readRL: ratelimiter.New(
+			settings.Read.Max,
+			settings.Read.Window,
+			opts...,
+		),
+		writeRL: ratelimiter.New(
+			settings.Write.Max,
+			settings.Write.Window,
+			opts...,
+		),
 	}
 }
 
-func Wire(db *gorm.DB) *Controller {
-	return NewController(WireService(db))
+func Wire(db *gorm.DB, settings ratelimiter.Settings) *Controller {
+	return NewController(WireService(db), settings)
 }
 
 func (ctrl *Controller) Mount(api *fuego.Server, session *scs.SessionManager) {
@@ -43,7 +56,7 @@ func (ctrl *Controller) Mount(api *fuego.Server, session *scs.SessionManager) {
 func (ctrl *Controller) GetUser(
 	c fuego.ContextNoBody,
 ) (*UserResponse, error) {
-	if err := ctrl.rl.Check(c.Request()); err != nil {
+	if err := ctrl.readRL.Check(c.Response(), c.Request()); err != nil {
 		return nil, err
 	}
 
@@ -63,7 +76,7 @@ func (ctrl *Controller) GetUser(
 func (ctrl *Controller) ListUsers(
 	c fuego.ContextNoBody,
 ) (*UsersListResponse, error) {
-	if err := ctrl.rl.Check(c.Request()); err != nil {
+	if err := ctrl.readRL.Check(c.Response(), c.Request()); err != nil {
 		return nil, err
 	}
 
@@ -91,7 +104,7 @@ func (ctrl *Controller) ListUsers(
 func (ctrl *Controller) CreateUser(
 	c fuego.ContextWithBody[CreateUserRequest],
 ) (*UserResponse, error) {
-	if err := ctrl.rl.Check(c.Request()); err != nil {
+	if err := ctrl.writeRL.Check(c.Response(), c.Request()); err != nil {
 		return nil, err
 	}
 
@@ -125,7 +138,7 @@ func (ctrl *Controller) CreateUser(
 func (ctrl *Controller) UpdateUser(
 	c fuego.ContextWithBody[UpdateUserRequest],
 ) (*UserResponse, error) {
-	if err := ctrl.rl.Check(c.Request()); err != nil {
+	if err := ctrl.writeRL.Check(c.Response(), c.Request()); err != nil {
 		return nil, err
 	}
 
@@ -152,7 +165,7 @@ func (ctrl *Controller) UpdateUser(
 func (ctrl *Controller) DeleteUser(
 	c fuego.ContextNoBody,
 ) (*types.MessageResponse, error) {
-	if err := ctrl.rl.Check(c.Request()); err != nil {
+	if err := ctrl.writeRL.Check(c.Response(), c.Request()); err != nil {
 		return nil, err
 	}
 

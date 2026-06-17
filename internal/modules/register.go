@@ -7,8 +7,8 @@ import (
 )
 
 var registry = []Factory{
-	func(b Boot) Module { return users.Wire(b.DB) },
-	func(b Boot) Module { return auth.Wire(b.DB, b.Session) },
+	func(b Boot) Module { return users.Wire(b.DB, b.RateLimit) },
+	func(b Boot) Module { return auth.Wire(b.DB, b.Session, b.RateLimit) },
 }
 
 // Mount wires and registers every module.
