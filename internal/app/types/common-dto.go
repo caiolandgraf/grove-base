@@ -3,7 +3,7 @@ package types
 
 // ErrorResponse is the standard error payload returned by the API.
 type ErrorResponse struct {
-	Message string `json:"message" example:"validation failed"`
+	Message string `json:"message"         example:"validation failed"`
 	Error   string `json:"error,omitempty" example:"email already exists"`
 }
 

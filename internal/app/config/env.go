@@ -12,33 +12,33 @@ import (
 
 type Config struct {
 	// Database
-	DBHost     string `env:"DB_HOST"     envDefault:"localhost"`
-	DBPort     int    `env:"DB_PORT"     envDefault:"5432"`
+	DBHost     string `env:"DB_HOST"              envDefault:"localhost"`
+	DBPort     int    `env:"DB_PORT"              envDefault:"5432"`
 	DBUser     string `env:"DB_USER,required"`
 	DBPassword string `env:"DB_PASSWORD,required"`
 	DBName     string `env:"DB_NAME,required"`
-	DBSSLMode  string `env:"DB_SSLMODE"  envDefault:"disable"`
+	DBSSLMode  string `env:"DB_SSLMODE"           envDefault:"disable"`
 
 	// Redis
-	RedisHost     string `env:"REDIS_HOST" envDefault:"localhost"`
-	RedisPort     int    `env:"REDIS_PORT" envDefault:"6379"`
+	RedisHost     string `env:"REDIS_HOST"     envDefault:"localhost"`
+	RedisPort     int    `env:"REDIS_PORT"     envDefault:"6379"`
 	RedisPassword string `env:"REDIS_PASSWORD"`
 
 	// Observability
-	OtelEnabled          bool    `env:"OTEL_ENABLED"                  envDefault:"true"`
+	OtelEnabled          bool    `env:"OTEL_ENABLED"                 envDefault:"true"`
 	OtelServiceName      string  `env:"OTEL_SERVICE_NAME"            envDefault:"grove-base"`
 	OtelOTLPEndpoint     string  `env:"OTEL_EXPLOERER_OTLP_ENDPOINT" envDefault:"localhost:4318"`
 	OtelTraceSampleRatio float64 `env:"OTEL_TRACE_SAMPLE_RATIO"      envDefault:"1.0"`
-	MetricsEnabled       bool    `env:"METRICS_ENABLED"               envDefault:"true"`
+	MetricsEnabled       bool    `env:"METRICS_ENABLED"              envDefault:"true"`
 
 	// CORS
 	CORSAllowedOrigins string `env:"CORS_ALLOWED_ORIGINS" envDefault:"http://localhost"`
 
 	// Application
-	ServerAddr   string `env:"SERVER_ADDR"  envDefault:":8080"`
-	Environment  string `env:"ENVIRONMENT"  envDefault:"development"`
+	ServerAddr   string `env:"SERVER_ADDR"       envDefault:":8080"`
+	Environment  string `env:"ENVIRONMENT"       envDefault:"development"`
 	BaseURL      string `env:"BASE_URL,required"`
-	AppName      string `env:"APP_NAME"     envDefault:"Grove Base"`
+	AppName      string `env:"APP_NAME"          envDefault:"Grove Base"`
 	AppDesc      string `env:"APP_DESC"`
 	AppOGDC      string `env:"APP_OGDC"`
 	CookieDomain string `env:"COOKIE_DOMAIN"`
@@ -48,11 +48,11 @@ type Config struct {
 	LogFile  string `env:"LOG_FILE"  envDefault:".grove/logs/app.log"`
 
 	// Rate limiting
-	RateLimitLimit            int    `env:"RATE_LIMIT_LIMIT"               envDefault:"5"`
-	RateLimitWindowSec        int    `env:"RATE_LIMIT_WINDOW_SEC"        envDefault:"30"`
-	RateLimitWriteLimit       int    `env:"RATE_LIMIT_WRITE_LIMIT"       envDefault:"3"`
-	RateLimitWriteWindowSec   int    `env:"RATE_LIMIT_WRITE_WINDOW_SEC"  envDefault:"60"`
-	RateLimitTrustedProxies   string `env:"RATE_LIMIT_TRUSTED_PROXIES"`
+	RateLimitLimit          int    `env:"RATE_LIMIT_LIMIT"            envDefault:"5"`
+	RateLimitWindowSec      int    `env:"RATE_LIMIT_WINDOW_SEC"       envDefault:"30"`
+	RateLimitWriteLimit     int    `env:"RATE_LIMIT_WRITE_LIMIT"      envDefault:"3"`
+	RateLimitWriteWindowSec int    `env:"RATE_LIMIT_WRITE_WINDOW_SEC" envDefault:"60"`
+	RateLimitTrustedProxies string `env:"RATE_LIMIT_TRUSTED_PROXIES"`
 }
 
 var Env Config
