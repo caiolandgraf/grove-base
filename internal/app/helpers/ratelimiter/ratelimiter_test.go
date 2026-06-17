@@ -1,6 +1,7 @@
 package ratelimiter
 
 import (
+	"context"
 	"net"
 	"net/http"
 	"net/http/httptest"
@@ -9,7 +10,7 @@ import (
 )
 
 func newReq(ip string) *http.Request {
-	r := httptest.NewRequest(http.MethodGet, "/", nil)
+	r := httptest.NewRequestWithContext(context.Background(), http.MethodGet, "/", nil)
 	r.RemoteAddr = ip + ":12345"
 	return r
 }
